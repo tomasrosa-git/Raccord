@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/* El sistema de diseño completo (tipografías, letterbox, marca de cambio)
+   se implementa en la fase de frontend. Acá solo la base de color. */
+
+@theme inline {
+  --color-negro-sala: var(--color-negro-sala);
+  --color-carbon: var(--color-carbon);
+  --color-papel: var(--color-papel);
+  --color-marca-cambio: var(--color-marca-cambio);
+  --color-terciopelo: var(--color-terciopelo);
+  --color-borde: var(--color-borde);
+}
+
+body {
+  background: var(--color-negro-sala);
+  color: var(--color-papel);
+}

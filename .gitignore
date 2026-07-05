@@ -1,0 +1,19 @@
+# Dependencias
+node_modules/
+
+# Env
+.env
+.env.local
+.env*.local
+
+# Builds
+dist/
+.next/
+out/
+
+# Sistema
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*

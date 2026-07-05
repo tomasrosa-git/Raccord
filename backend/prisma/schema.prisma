@@ -1,0 +1,235 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooler de Supabase (transaction mode) para la app
+  directUrl = env("DIRECT_URL") // conexión directa, requerida por prisma migrate
+}
+
+enum RolCredito {
+  DIRECTOR
+  ACTOR
+  GUIONISTA
+  FOTOGRAFIA
+  MONTAJE
+  MUSICA
+  PRODUCTOR
+}
+
+enum Rol {
+  USUARIO
+  ADMIN
+}
+
+model Persona {
+  id              String    @id @default(uuid())
+  tmdbId          Int?      @unique
+  nombre          String
+  biografia       String?
+  fechaNacimiento DateTime?
+  lugarNacimiento String?
+  fotoUrl         String?
+  createdAt       DateTime  @default(now())
+
+  creditos      CreditoPelicula[]
+  etapasCarrera EtapaCarrera[]
+  premios       PremioGanado[]
+  estilos       PersonaEstiloTag[]
+  seguidores    SeguidorPersona[]
+
+  @@index([nombre])
+}
+
+model Pelicula {
+  id             String    @id @default(uuid())
+  tmdbId         Int       @unique
+  titulo         String
+  tituloOriginal String?
+  sinopsis       String?
+  fechaEstreno   DateTime?
+  duracionMin    Int?
+  aspectRatio    String? // ej: "2.39:1" — usado en el letterbox del hero
+  posterUrl      String?
+  backdropUrl    String?
+  createdAt      DateTime  @default(now())
+
+  generos   PeliculaGenero[]
+  creditos  CreditoPelicula[]
+  paleta    ColorPaleta[]
+  premios   PremioGanado[]
+  reviews   Review[]
+  watchlist WatchlistItem[]
+  likes     Like[]
+
+  @@index([titulo])
+}
+
+model Genero {
+  id        String           @id @default(uuid())
+  nombre    String           @unique
+  peliculas PeliculaGenero[]
+}
+
+model PeliculaGenero {
+  peliculaId String
+  generoId   String
+  pelicula   Pelicula @relation(fields: [peliculaId], references: [id])
+  genero     Genero   @relation(fields: [generoId], references: [id])
+
+  @@id([peliculaId, generoId])
+}
+
+model CreditoPelicula {
+  id         String     @id @default(uuid())
+  peliculaId String
+  personaId  String
+  rol        RolCredito
+  personaje  String?
+  orden      Int?
+
+  pelicula Pelicula @relation(fields: [peliculaId], references: [id])
+  persona  Persona  @relation(fields: [personaId], references: [id])
+
+  @@index([personaId, rol])
+  @@index([peliculaId])
+}
+
+model ColorPaleta {
+  id         String  @id @default(uuid())
+  peliculaId String
+  colorHex   String
+  porcentaje Float
+  stillUrl   String?
+
+  pelicula Pelicula @relation(fields: [peliculaId], references: [id])
+
+  @@index([peliculaId])
+}
+
+model Premio {
+  id        String         @id @default(uuid())
+  nombre    String
+  categoria String
+  ganados   PremioGanado[]
+}
+
+model PremioGanado {
+  id         String  @id @default(uuid())
+  premioId   String
+  anio       Int
+  ganador    Boolean @default(false)
+  peliculaId String?
+  personaId  String?
+
+  premio   Premio    @relation(fields: [premioId], references: [id])
+  pelicula Pelicula? @relation(fields: [peliculaId], references: [id])
+  persona  Persona?  @relation(fields: [personaId], references: [id])
+}
+
+model EtapaCarrera {
+  id          String @id @default(uuid())
+  personaId   String
+  titulo      String
+  descripcion String
+  anioInicio  Int
+  anioFin     Int?
+
+  persona Persona @relation(fields: [personaId], references: [id])
+}
+
+model EstiloTag {
+  id       String             @id @default(uuid())
+  nombre   String             @unique
+  personas PersonaEstiloTag[]
+}
+
+model PersonaEstiloTag {
+  personaId String
+  tagId     String
+  persona   Persona   @relation(fields: [personaId], references: [id])
+  tag       EstiloTag @relation(fields: [tagId], references: [id])
+
+  @@id([personaId, tagId])
+}
+
+model Usuario {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  bio          String?
+  rol          Rol      @default(USUARIO)
+  createdAt    DateTime @default(now())
+
+  reviews       Review[]
+  watchlist     WatchlistItem[]
+  likes         Like[]
+  siguiendo     SeguidorPersona[]
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  usuarioId String
+  expiresAt DateTime
+  revocado  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@index([usuarioId])
+}
+
+model Review {
+  id              String   @id @default(uuid())
+  usuarioId       String
+  peliculaId      String
+  texto           String
+  puntuacion      Int
+  contieneSpoiler Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id])
+  pelicula Pelicula @relation(fields: [peliculaId], references: [id])
+
+  @@unique([usuarioId, peliculaId])
+}
+
+model WatchlistItem {
+  id         String   @id @default(uuid())
+  usuarioId  String
+  peliculaId String
+  addedAt    DateTime @default(now())
+
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id])
+  pelicula Pelicula @relation(fields: [peliculaId], references: [id])
+
+  @@unique([usuarioId, peliculaId])
+}
+
+model Like {
+  id         String   @id @default(uuid())
+  usuarioId  String
+  peliculaId String
+  createdAt  DateTime @default(now())
+
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id])
+  pelicula Pelicula @relation(fields: [peliculaId], references: [id])
+
+  @@unique([usuarioId, peliculaId])
+}
+
+model SeguidorPersona {
+  usuarioId String
+  personaId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  persona   Persona @relation(fields: [personaId], references: [id])
+
+  @@id([usuarioId, personaId])
+}
