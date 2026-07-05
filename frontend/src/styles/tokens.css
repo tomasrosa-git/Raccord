@@ -1,0 +1,14 @@
+/*
+ * Tokens de diseño de Raccord.
+ * Fundamento: la sala de proyección y la técnica de montaje —
+ * negro de sala, marcas de cambio de rollo, letterbox, contact sheets.
+ */
+
+:root {
+  --color-negro-sala: #0e0d0c; /* fondo principal */
+  --color-carbon: #1a1816; /* superficies, cards */
+  --color-papel: #f2ede4; /* texto principal */
+  --color-marca-cambio: #c9a227; /* acento primario — usar con moderación */
+  --color-terciopelo: #8b2e2e; /* acento secundario — ratings, likes, spoilers */
+  --color-borde: #3a3632; /* líneas/dividers sutiles */
+}
