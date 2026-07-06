@@ -1,0 +1,53 @@
+# Blueprint de Render: define los dos servicios de Raccord.
+# En Render: New → Blueprint → conectar este repo. Los env vars marcados
+# sync: false se cargan a mano en el dashboard (secretos).
+
+services:
+  # --- API (Express + Prisma) ---
+  - type: web
+    name: raccord-api
+    runtime: node
+    rootDir: backend
+    # Virginia = us-east: misma región que el proyecto de Supabase (us-east-1),
+    # minimiza la latencia de cada query.
+    region: virginia
+    plan: free
+    buildCommand: npm ci && npm run build
+    # migrate deploy corre antes del server: el plan free no tiene preDeployCommand.
+    startCommand: npx prisma migrate deploy && npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL # pooler de Supabase (puerto 6543, ?pgbouncer=true)
+        sync: false
+      - key: DIRECT_URL # conexión directa (puerto 5432), para las migraciones
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+      - key: COOKIE_DOMAIN
+        value: .raccord.com.ar
+      - key: CORS_ORIGIN
+        value: https://raccord.com.ar,https://www.raccord.com.ar
+      - key: JWT_ACCESS_TTL
+        value: 15m
+      - key: REFRESH_TOKEN_TTL_DIAS
+        value: "30"
+
+  # --- Frontend (Next.js SSR/ISR) ---
+  - type: web
+    name: raccord-web
+    runtime: node
+    rootDir: frontend
+    region: virginia
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Pública: queda embebida en el build. Si cambia, hay que redeployar.
+      - key: NEXT_PUBLIC_API_URL
+        value: https://api.raccord.com.ar
