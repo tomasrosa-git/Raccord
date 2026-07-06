@@ -5,6 +5,9 @@ import cookieParser from 'cookie-parser';
 import { env } from './config/env';
 import { errorHandler } from './middlewares/errorHandler';
 import { AppError } from './shared/errors/AppError';
+import { authRouter } from './modules/usuario/auth.routes';
+import { usuarioRouter } from './modules/usuario/usuario.routes';
+import { tmdbSyncRouter } from './integrations/tmdb/tmdb.routes';
 
 export const app = express();
 
@@ -22,8 +25,11 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Los routers de módulos se montan acá a medida que se implementan (Fases 2-5):
-// app.use('/api/auth', authRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/usuarios', usuarioRouter);
+app.use('/api/admin/sync/tmdb', tmdbSyncRouter);
+
+// El resto de los routers de módulos se montan acá a medida que se implementan (Fases 3-5):
 // app.use('/api/peliculas', peliculaRouter);
 // ...
 
