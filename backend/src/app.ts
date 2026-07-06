@@ -18,10 +18,15 @@ import { requireAuth } from './middlewares/auth.middleware';
 
 export const app = express();
 
+// Render (y cualquier PaaS) pone un proxy adelante: sin esto el rate limiter
+// vería la IP del proxy para todos los requests y `secure` en cookies fallaría.
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    // Admite varios orígenes separados por coma (ej: producción + localhost).
+    origin: env.CORS_ORIGIN.split(',').map((o) => o.trim()),
     credentials: true,
   })
 );
