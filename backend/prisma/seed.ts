@@ -6,7 +6,8 @@ import { tmdbSyncService } from '../src/integrations/tmdb/tmdb.sync.service';
  * curaduría en profundidad (etapas de carrera, tags de estilo, paleta) en
  * fases posteriores — acá solo se sincronizan los datos de TMDB.
  */
-const DIRECTORES_FUNDACIONALES: { nombre: string; curado?: boolean }[] = [
+// `tmdbId` explícito para nombres con homónimos donde la búsqueda es ambigua.
+const DIRECTORES_FUNDACIONALES: { nombre: string; curado?: boolean; tmdbId?: number }[] = [
   { nombre: 'Wes Anderson', curado: true },
   { nombre: 'Pedro Almodóvar', curado: true },
   { nombre: 'Bong Joon-ho', curado: true },
@@ -21,7 +22,7 @@ const DIRECTORES_FUNDACIONALES: { nombre: string; curado?: boolean }[] = [
   { nombre: 'Damien Chazelle' },
   { nombre: 'Greta Gerwig' },
   { nombre: 'Alfonso Cuarón' },
-  { nombre: 'Fernando Solanas' },
+  { nombre: 'Fernando "Pino" Solanas', tmdbId: 71353 },
 ];
 
 async function main() {
@@ -31,7 +32,7 @@ async function main() {
   let totalFallidas = 0;
 
   for (const director of DIRECTORES_FUNDACIONALES) {
-    const tmdbId = await tmdbSyncService.buscarTmdbId(director.nombre);
+    const tmdbId = director.tmdbId ?? (await tmdbSyncService.buscarTmdbId(director.nombre));
     if (!tmdbId) {
       console.error(`✗ ${director.nombre}: no se encontró en TMDB`);
       continue;

@@ -1,4 +1,5 @@
 import pLimit from 'p-limit';
+import { Prisma } from '@prisma/client';
 import type { RolCredito } from '@prisma/client';
 import { prisma } from '../../config/prisma';
 import { TMDB_MAX_CONCURRENCIA } from '../../config/constants';
@@ -23,9 +24,25 @@ const JOB_A_ROL: Record<string, RolCredito> = {
   Producer: 'PRODUCTOR',
 };
 
+/**
+ * Reintenta una vez ante P2002: dos upserts concurrentes sobre la misma clave
+ * única pueden chocar (Prisma no siempre usa el upsert nativo atómico);
+ * al reintentar, la fila ya existe y el upsert toma la rama de update.
+ */
+async function conReintentoPorCarrera<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+      return fn();
+    }
+    throw err;
+  }
+}
+
 /** Crea la persona si no existe; si existe no pisa datos (puede estar curada a mano). */
 async function upsertPersonaMinima(datos: { tmdbId: number; nombre: string; fotoPath: string | null }) {
-  return prisma.persona.upsert({
+  return conReintentoPorCarrera(() => prisma.persona.upsert({
     where: { tmdbId: datos.tmdbId },
     update: {},
     create: {
@@ -33,13 +50,15 @@ async function upsertPersonaMinima(datos: { tmdbId: number; nombre: string; foto
       nombre: datos.nombre,
       fotoUrl: datos.fotoPath ? tmdbImageUrl.perfil(datos.fotoPath) : null,
     },
-  });
+  }));
 }
 
 async function upsertGeneros(nombres: string[]) {
   return Promise.all(
     nombres.map((nombre) =>
-      prisma.genero.upsert({ where: { nombre }, update: {}, create: { nombre } })
+      conReintentoPorCarrera(() =>
+        prisma.genero.upsert({ where: { nombre }, update: {}, create: { nombre } })
+      )
     )
   );
 }
@@ -186,11 +205,16 @@ export const tmdbSyncService = {
     };
   },
 
-  /** Busca una persona por nombre y devuelve el mejor candidato (para el seed). */
+  /**
+   * Busca una persona por nombre y devuelve el mejor candidato (para el seed).
+   * Prioriza directores y desempata por popularidad: TMDB tiene homónimos
+   * con popularidad 0 que pueden aparecer primero en los resultados.
+   */
   async buscarTmdbId(nombre: string): Promise<number | null> {
     const { results } = await getTmdbClient().buscarPersonas(nombre);
     if (results.length === 0) return null;
     const directores = results.filter((r) => r.known_for_department === 'Directing');
-    return (directores[0] ?? results[0])!.id;
+    const candidatos = directores.length > 0 ? directores : results;
+    return candidatos.sort((a, b) => b.popularity - a.popularity)[0]!.id;
   },
 };
