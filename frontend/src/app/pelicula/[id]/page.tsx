@@ -8,6 +8,8 @@ import { Chip } from '@/components/ui/Chip';
 import { EtiquetaSeccion } from '@/components/ui/EtiquetaSeccion';
 import { FichaTecnica } from '@/components/pelicula/FichaTecnica';
 import { PeliculasSimilares } from '@/components/pelicula/PeliculasSimilares';
+import { AccionesPelicula } from '@/components/pelicula/AccionesPelicula';
+import { Reviews } from '@/components/pelicula/Reviews';
 import { anioDe, formatearDuracion } from '@/lib/utils/formatters';
 import type { PeliculaDetalle } from '@/types';
 
@@ -117,6 +119,8 @@ export default async function PaginaPelicula({ params }: Props) {
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <div className="grid gap-12 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-12">
+            <AccionesPelicula peliculaId={pelicula.id} />
+
             {pelicula.sinopsis && (
               <section>
                 <EtiquetaSeccion>Sinopsis</EtiquetaSeccion>
@@ -150,6 +154,8 @@ export default async function PaginaPelicula({ params }: Props) {
             )}
 
             <PaletaBarra colores={paleta} />
+
+            <Reviews peliculaId={pelicula.id} />
           </div>
 
           <aside className="space-y-8">
