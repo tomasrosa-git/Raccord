@@ -12,7 +12,10 @@ services:
     # minimiza la latencia de cada query.
     region: virginia
     plan: free
-    buildCommand: npm ci && npm run build
+    # --include=dev es necesario: con NODE_ENV=production seteado más abajo,
+    # `npm ci` omite devDependencies por defecto — ahí viven typescript y los
+    # @types/*, sin los cuales tsc falla en el build.
+    buildCommand: npm ci --include=dev && npm run build
     # migrate deploy corre antes del server: el plan free no tiene preDeployCommand.
     startCommand: npx prisma migrate deploy && npm run start
     healthCheckPath: /health
@@ -43,7 +46,9 @@ services:
     rootDir: frontend
     region: virginia
     plan: free
-    buildCommand: npm ci && npm run build
+    # Mismo motivo que en raccord-api: @tailwindcss/postcss vive en
+    # devDependencies y Next lo necesita para el build de producción.
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm run start
     envVars:
       - key: NODE_ENV
