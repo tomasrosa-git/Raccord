@@ -8,6 +8,8 @@ import { AppError } from './shared/errors/AppError';
 import { authRouter } from './modules/usuario/auth.routes';
 import { usuarioRouter } from './modules/usuario/usuario.routes';
 import { tmdbSyncRouter } from './integrations/tmdb/tmdb.routes';
+import { peliculaRouter } from './modules/pelicula/pelicula.routes';
+import { personaRouter } from './modules/persona/persona.routes';
 
 export const app = express();
 
@@ -28,10 +30,10 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/usuarios', usuarioRouter);
 app.use('/api/admin/sync/tmdb', tmdbSyncRouter);
+app.use('/api/peliculas', peliculaRouter);
+app.use('/api/personas', personaRouter);
 
-// El resto de los routers de módulos se montan acá a medida que se implementan (Fases 3-5):
-// app.use('/api/peliculas', peliculaRouter);
-// ...
+// Pendientes (Fase 5+): colaboradores, firma-visual, reviews, watchlist, likes, premios.
 
 app.use((req, _res, next) => {
   next(AppError.notFound(`Ruta no encontrada: ${req.method} ${req.path}`));
