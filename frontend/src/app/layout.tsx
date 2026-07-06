@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Piazzolla, Work_Sans, IBM_Plex_Mono } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { AuthProvider } from '@/lib/hooks/useAuth';
 import './globals.css';
 
 const piazzolla = Piazzolla({
@@ -43,9 +44,11 @@ export default function RootLayout({
       className={`${piazzolla.variable} ${workSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col">
-        <Header />
-        <main className="flex flex-1 flex-col">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main className="flex flex-1 flex-col">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
