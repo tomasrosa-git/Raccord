@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
 
-/* El sistema de diseño completo (tipografías, letterbox, marca de cambio)
-   se implementa en la fase de frontend. Acá solo la base de color. */
-
 @theme inline {
   --color-negro-sala: var(--color-negro-sala);
   --color-carbon: var(--color-carbon);
@@ -11,9 +8,37 @@
   --color-marca-cambio: var(--color-marca-cambio);
   --color-terciopelo: var(--color-terciopelo);
   --color-borde: var(--color-borde);
+
+  /* Inyectadas por next/font en el layout raíz. */
+  --font-display: var(--font-piazzolla);
+  --font-sans: var(--font-work-sans);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
   background: var(--color-negro-sala);
   color: var(--color-papel);
+  font-family: var(--font-work-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--color-marca-cambio);
+  color: var(--color-negro-sala);
+}
+
+/* Focus visible en todos los interactivos (accesibilidad de teclado). */
+:focus-visible {
+  outline: 2px solid var(--color-marca-cambio);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
