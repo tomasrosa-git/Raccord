@@ -12,7 +12,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { Chip } from '@/components/ui/Chip';
 import { EtiquetaSeccion } from '@/components/ui/EtiquetaSeccion';
-import { PosterCard } from '@/components/pelicula/PosterCard';
+import { FilmografiaTira } from '@/components/cineasta/FilmografiaTira';
 import { FirmaVisual } from '@/components/cineasta/FirmaVisual';
 import { ColaboradoresFrecuentes } from '@/components/cineasta/ColaboradoresFrecuentes';
 import { LineaDeTiempo } from '@/components/cineasta/LineaDeTiempo';
@@ -45,8 +45,9 @@ export default async function PaginaCineasta({ params }: Props) {
   const persona = await buscarPersona(id);
   if (!persona) notFound();
 
-  const [dirigidas, colaboradores, firmaVisual, premios, etapas] = await Promise.all([
+  const [dirigidas, actuadas, colaboradores, firmaVisual, premios, etapas] = await Promise.all([
     getFilmografia(id, 'DIRECTOR').catch(() => []),
+    getFilmografia(id, 'ACTOR').catch(() => []),
     getColaboradores(id).catch(() => []),
     getFirmaVisual(id).catch(() => []),
     getPremios(id).catch(() => []),
@@ -70,7 +71,11 @@ export default async function PaginaCineasta({ params }: Props) {
           </div>
         )}
         <div>
-          <EtiquetaSeccion>Cineasta</EtiquetaSeccion>
+          {/* Etiqueta según el rol predominante: la plataforma es de directores,
+              pero un intérprete puro no debería figurar como "cineasta". */}
+          <EtiquetaSeccion>
+            {dirigidas.length > 0 ? 'Cineasta' : actuadas.length > 0 ? 'Intérprete' : 'Persona'}
+          </EtiquetaSeccion>
           <h1 className="mt-4 font-display text-4xl leading-tight sm:text-6xl">
             {persona.nombre}
           </h1>
@@ -103,19 +108,8 @@ export default async function PaginaCineasta({ params }: Props) {
       <div className="mt-16 space-y-16">
         <FirmaVisual items={firmaVisual} />
 
-        {dirigidas.length > 0 && (
-          <section>
-            <EtiquetaSeccion>Filmografía como director</EtiquetaSeccion>
-            {/* Contact sheet: tira con divisores finos, como negativos. */}
-            <div className="mt-6 flex gap-px overflow-x-auto bg-borde pb-2">
-              {dirigidas.map((credito, i) => (
-                <div key={`${credito.pelicula.id}-${i}`} className="w-36 shrink-0 bg-negro-sala pr-3 sm:w-44">
-                  <PosterCard pelicula={credito.pelicula} />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        <FilmografiaTira titulo="Filmografía como director" creditos={dirigidas} />
+        <FilmografiaTira titulo="Filmografía como actor" creditos={actuadas} mostrarPersonaje />
 
         <ColaboradoresFrecuentes colaboradores={colaboradores} />
         <LineaDeTiempo etapas={etapas} />
