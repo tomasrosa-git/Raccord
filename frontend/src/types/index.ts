@@ -98,6 +98,33 @@ export interface PremioGanado {
   pelicula: { id: string; titulo: string } | null;
 }
 
+export interface PersonaBusqueda {
+  id: string;
+  nombre: string;
+  fotoUrl: string | null;
+  esDirector: boolean;
+}
+
+export interface PeliculaBusqueda {
+  id: string;
+  titulo: string;
+  fechaEstreno: string | null;
+  duracionMin: number | null;
+  posterUrl: string | null;
+}
+
+export interface ResultadoBusqueda {
+  peliculas: PeliculaBusqueda[];
+  personas: PersonaBusqueda[];
+}
+
+export interface DirectorResumen {
+  id: string;
+  nombre: string;
+  fotoUrl: string | null;
+  peliculasDirigidas: number;
+}
+
 export interface EtapaCarrera {
   id: string;
   titulo: string;

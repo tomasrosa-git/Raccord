@@ -3,6 +3,14 @@ import { parsear } from '../../middlewares/validateRequest';
 import { personaService } from './persona.service';
 import { idParamsSchema, filmografiaQuerySchema } from './persona.schema';
 
+export const listarDirectores: RequestHandler = async (_req, res, next) => {
+  try {
+    res.json(await personaService.listarDirectores());
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const detalle: RequestHandler = async (req, res, next) => {
   try {
     const { id } = parsear(idParamsSchema, req.params);

@@ -15,6 +15,31 @@ export const personaRepository = {
     return prisma.persona.findUnique({ where: { id }, select: { id: true } });
   },
 
+  // La mayoría de las 274 personas con crédito de dirección lo tienen por una
+  // sola película incidental (un montajista que dirigió un corto, etc.); el
+  // umbral deja solo directores con presencia real en el catálogo.
+  MIN_PELICULAS_DIRECTOR: 2,
+
+  /** Directores con presencia real (>= MIN películas), con su cantidad de películas dirigidas. */
+  async listarDirectores() {
+    const conteos = await prisma.creditoPelicula.groupBy({
+      by: ['personaId'],
+      where: { rol: 'DIRECTOR' },
+      _count: { peliculaId: true },
+      having: { peliculaId: { _count: { gte: this.MIN_PELICULAS_DIRECTOR } } },
+    });
+    const porPersona = new Map(conteos.map((c) => [c.personaId, c._count.peliculaId]));
+
+    const personas = await prisma.persona.findMany({
+      where: { id: { in: [...porPersona.keys()] } },
+      select: { id: true, nombre: true, fotoUrl: true },
+    });
+
+    return personas
+      .map((p) => ({ ...p, peliculasDirigidas: porPersona.get(p.id) ?? 0 }))
+      .sort((a, b) => b.peliculasDirigidas - a.peliculasDirigidas || a.nombre.localeCompare(b.nombre));
+  },
+
   buscarFilmografia(personaId: string, rol?: RolCredito) {
     return prisma.creditoPelicula.findMany({
       where: { personaId, ...(rol && { rol }) },

@@ -6,9 +6,15 @@ import type {
   FirmaVisualItem,
   PremioGanado,
   EtapaCarrera,
+  DirectorResumen,
 } from '@/types';
 
 const REVALIDATE_PERFIL = 3600;
+const REVALIDATE_LISTADO = 600;
+
+export function getDirectores() {
+  return apiGet<DirectorResumen[]>('/personas/directores', { revalidate: REVALIDATE_LISTADO });
+}
 
 export function getPersona(id: string) {
   return apiGet<PersonaDetalle>(`/personas/${id}`, { revalidate: REVALIDATE_PERFIL });
