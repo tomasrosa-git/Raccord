@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { Logo } from '@/components/ui/Logo';
 
 const linkClase =
   'rounded-sm px-3 py-1.5 text-sm text-papel/70 transition-colors hover:bg-carbon hover:text-papel';
@@ -13,7 +14,8 @@ export function Header() {
   return (
     <header className="border-b border-borde">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="font-display text-xl tracking-tight">
+        <Link href="/" className="flex items-center gap-2 font-display text-xl tracking-tight">
+          <Logo size={28} />
           Raccord
         </Link>
         <nav className="flex items-center gap-1 sm:gap-2">
