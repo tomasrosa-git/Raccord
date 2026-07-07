@@ -8,6 +8,10 @@ async function asegurarQueExiste(personaId: string) {
 }
 
 export const personaService = {
+  listarDirectores() {
+    return personaRepository.listarDirectores();
+  },
+
   async obtenerDetalle(id: string) {
     const persona = await personaRepository.buscarPorId(id);
     if (!persona) throw AppError.notFound('Persona no encontrada');
