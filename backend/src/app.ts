@@ -16,6 +16,7 @@ import { peliculaReviewsRouter, reviewRouter } from './modules/review/review.rou
 import { watchlistRouter, likesRouter, miEstadoPelicula } from './modules/watchlist/watchlist.routes';
 import { busquedaRouter } from './modules/busqueda/busqueda.routes';
 import { statsRouter } from './modules/stats/stats.routes';
+import { premioRouter } from './modules/premios/premios.routes';
 import { requireAuth } from './middlewares/auth.middleware';
 
 export const app = express();
@@ -53,8 +54,7 @@ app.use('/api/personas', personaRouter);
 app.use('/api/reviews', reviewRouter);
 app.use('/api/watchlist', watchlistRouter);
 app.use('/api/likes', likesRouter);
-
-// Pendiente (carga manual de datos): /api/premios/:id/ganadores.
+app.use('/api/premios', premioRouter);
 
 app.use((req, _res, next) => {
   next(AppError.notFound(`Ruta no encontrada: ${req.method} ${req.path}`));
