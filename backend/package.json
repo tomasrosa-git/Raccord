@@ -13,6 +13,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "seed": "tsx prisma/seed.ts",
+    "seed:premios": "tsx prisma/seed-premios.ts",
     "paletas": "tsx src/jobs/extraerPaletas.job.ts"
   },
   "prisma": {
