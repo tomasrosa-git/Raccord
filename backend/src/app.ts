@@ -15,6 +15,7 @@ import { paletaRouter } from './modules/paleta/paleta.routes';
 import { peliculaReviewsRouter, reviewRouter } from './modules/review/review.routes';
 import { watchlistRouter, likesRouter, miEstadoPelicula } from './modules/watchlist/watchlist.routes';
 import { busquedaRouter } from './modules/busqueda/busqueda.routes';
+import { statsRouter } from './modules/stats/stats.routes';
 import { requireAuth } from './middlewares/auth.middleware';
 
 export const app = express();
@@ -40,6 +41,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/buscar', busquedaRouter);
+app.use('/api/stats', statsRouter);
 app.use('/api/usuarios', usuarioRouter);
 app.use('/api/admin/sync/tmdb', tmdbSyncRouter);
 app.use('/api/peliculas', peliculaReviewsRouter);
