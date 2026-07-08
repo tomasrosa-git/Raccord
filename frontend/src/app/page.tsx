@@ -1,8 +1,16 @@
 import Link from 'next/link';
 import { EtiquetaSeccion } from '@/components/ui/EtiquetaSeccion';
 import { Chip } from '@/components/ui/Chip';
+import { getStats } from '@/lib/api/stats';
 
-export default function Home() {
+export const revalidate = 3600;
+
+// Los 4 con curaduría en profundidad; el resto se cuenta contra las stats.
+const CURADOS = ['Wes Anderson', 'Pedro Almodóvar', 'Lucrecia Martel', 'Bong Joon-ho'];
+
+export default async function Home() {
+  const stats = await getStats().catch(() => null);
+
   return (
     <div className="flex flex-1 flex-col">
       {/* Barra de letterbox superior: guiño al encuadre de proyección. */}
@@ -18,7 +26,7 @@ export default function Home() {
         <p className="mt-6 max-w-xl text-base leading-relaxed text-papel/70 sm:text-lg">
           Filmografías completas, colaboradores de siempre y la paleta de color
           que hace reconocible a cada cineasta. Sin algoritmo de moda: catálogo
-          curado, empezando por quince directores fundacionales.
+          curado, director por director.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -28,17 +36,24 @@ export default function Home() {
           >
             Explorar el catálogo
           </Link>
-          <span className="font-mono text-xs text-papel/40">
-            261 películas · 15 directores
-          </span>
+          {stats && (
+            <span className="font-mono text-xs text-papel/40">
+              {stats.peliculas} películas · {stats.directores} directores
+            </span>
+          )}
         </div>
 
         <div className="mt-16 flex flex-wrap gap-2">
-          <Chip>Wes Anderson</Chip>
-          <Chip>Pedro Almodóvar</Chip>
-          <Chip>Lucrecia Martel</Chip>
-          <Chip>Bong Joon-ho</Chip>
-          <Chip className="text-papel/40">+11 más</Chip>
+          {CURADOS.map((nombre) => (
+            <Chip key={nombre}>{nombre}</Chip>
+          ))}
+          {stats && stats.directores > CURADOS.length && (
+            <Link href="/directores">
+              <Chip className="text-papel/40 transition-colors hover:text-papel">
+                +{stats.directores - CURADOS.length} más
+              </Chip>
+            </Link>
+          )}
         </div>
       </section>
 
