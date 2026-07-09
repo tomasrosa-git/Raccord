@@ -1,12 +1,14 @@
-# Raccord — Prompt maestro para Claude Code
+# Raccord — Especificación técnica y de diseño
+
+> Documento de diseño del proyecto: modelo de datos, arquitectura, endpoints y sistema de diseño. Funciona como el plan de referencia; la implementación final puede diferir en detalles.
 
 ## Contexto del proyecto
 
-Estoy construyendo **Raccord**, una plataforma web sobre cine de autor, con foco en el director/cineasta como eje central (no solo catálogo de películas). Es un proyecto de portfolio personal — el objetivo NO es monetización, sino tener un sistema real, profesional y escalable para mostrar como trabajo propio. Público: cinéfilos serios, con foco en el mercado hispanohablante/LatAm como diferenciador.
+**Raccord** es una plataforma web sobre cine de autor, con foco en el director/cineasta como eje central (no solo un catálogo de películas). Es un proyecto de portfolio personal: el objetivo no es la monetización sino construir un sistema real, profesional y escalable. Público: cinéfilos serios, con foco en el mercado hispanohablante/LatAm como diferenciador.
 
-**Requisito no negociable:** el resultado no debe verse "hecho 100% con IA" — evitar looks genéricos (gradientes violeta-azul, glassmorphism, cards con sombra suave idénticas entre sí, paleta crema+terracota, iconografía de librería stock sin criterio). El sistema de diseño está especificado abajo en detalle y debe seguirse con precisión.
+**Principio de diseño:** el producto evita deliberadamente los looks genéricos de plantilla (gradientes violeta-azul, glassmorphism, cards con sombra suave idénticas entre sí, paleta crema+terracota, iconografía de stock sin criterio). El sistema de diseño está especificado en detalle más abajo y se sigue con precisión.
 
-Trabajo en una MacBook y quiero que el desarrollo/uso normal de la plataforma ocupe lo mínimo posible de recursos locales — toda infraestructura pesada (DB, jobs de sync, procesamiento de imágenes) corre en servicios en la nube, no localmente.
+El desarrollo local es liviano: toda la infraestructura pesada (base de datos, jobs de sync, procesamiento de imágenes) corre en servicios en la nube, no en la máquina de desarrollo.
 
 ---
 
@@ -20,7 +22,7 @@ Trabajo en una MacBook y quiero que el desarrollo/uso normal de la plataforma oc
 
 **Backend:**
 - Node.js + Express + TypeScript
-- Prisma ORM (ver justificación abajo — NO usar TypeORM)
+- Prisma ORM (justificación abajo; se descartó TypeORM)
 - PostgreSQL (hosteado en Supabase)
 
 **Infraestructura:**
@@ -443,7 +445,7 @@ Wes Anderson, Pedro Almodóvar, Bong Joon-ho, Lucrecia Martel, Alejandro Gonzál
 4. Guardar película, créditos completos (cast + crew relevante), y géneros
 5. Si es director "curado en profundidad": extraer paleta de los primeros 5 backdrops con `node-vibrant`, guardar en `ColorPaleta`
 
-**Control de concurrencia:** usar `p-limit` (máximo 4 requests concurrentes a TMDB) para no saturar el rate limit ni tu propio proceso.
+**Control de concurrencia:** usar `p-limit` (máximo 4 requests concurrentes a TMDB) para no saturar el rate limit ni el proceso propio.
 
 **Premios** (solo para los 4 directores curados, proceso manual/puntual, no automatizado en el cron regular): consultar Wikidata vía SPARQL (gratis, sin API key) para obtener premios estructurados (Oscar, Cannes, Goya, etc.) y cargarlos a mano en `Premio`/`PremioGanado`.
 
@@ -464,7 +466,7 @@ Wes Anderson, Pedro Almodóvar, Bong Joon-ho, Lucrecia Martel, Alejandro Gonzál
 
 ## Sistema de diseño
 
-**Fundamento:** el mundo visual de Raccord nace de la sala de proyección y la técnica de montaje — negro de sala, marcas de cambio de rollo (cue marks), letterbox, contact sheets de negativos. Nada de looks genéricos de IA (evitar específicamente: paleta crema + serif alto contraste + acento terracota `#D97757`; fondo negro + acento verde ácido; layout tipo diario con hairlines).
+**Fundamento:** el mundo visual de Raccord nace de la sala de proyección y la técnica de montaje — negro de sala, marcas de cambio de rollo (cue marks), letterbox, contact sheets de negativos. Se evitan los looks genéricos de plantilla (específicamente: paleta crema + serif alto contraste + acento terracota `#D97757`; fondo negro + acento verde ácido; layout tipo diario con hairlines).
 
 ### Paleta (nombrar las variables CSS exactamente así)
 
@@ -517,7 +519,9 @@ Formularios (login/registro), navegación general, y cards de listados simples s
 
 ---
 
-## Orden de implementación sugerido
+## Roadmap de desarrollo
+
+Orden de implementación por fases:
 
 1. Setup de monorepo/carpetas, configuración de Prisma + Supabase, correr la migración inicial del schema.
 2. Backend: módulo `usuario` completo (auth con JWT + refresh token rotation).
@@ -529,5 +533,3 @@ Formularios (login/registro), navegación general, y cards de listados simples s
 8. Frontend: auth (login/registro), watchlist, likes, reviews.
 9. Deploy: Supabase + Render (backend y frontend) + configuración de dominio en NIC.ar.
 10. Juegos (fase final, opcional para el primer release).
-
-Por favor, implementá esto por fases, empezando por el punto 1, y confirmá conmigo antes de avanzar a la siguiente fase.
