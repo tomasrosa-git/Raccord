@@ -3,59 +3,49 @@ import { prisma } from '../config/prisma';
 import { extraerPaletaDePelicula } from '../integrations/tmdb/paleta.extractor';
 import { TMDB_MAX_CONCURRENCIA } from '../config/constants';
 
-// Directores curados en profundidad: paleta extraída desde el día 1.
-const TMDB_IDS_CURADOS = [
-  5655, // Wes Anderson
-  309, // Pedro Almodóvar
-  21684, // Bong Joon-ho
-  56208, // Lucrecia Martel
-];
-
+/**
+ * Extrae la paleta de color de todas las películas del catálogo que aún no
+ * la tienen (con --force reprocesa también las existentes). La firma visual
+ * de cada director se calcula a partir de estas paletas, así que este job es
+ * lo que enciende ese apartado en los perfiles.
+ *
+ * Reanudable: si se corta, la próxima corrida retoma por las pendientes.
+ */
 const limit = pLimit(TMDB_MAX_CONCURRENCIA);
 const forzar = process.argv.includes('--force');
 
 async function main() {
-  const directores = await prisma.persona.findMany({
-    where: { tmdbId: { in: TMDB_IDS_CURADOS } },
-    select: { id: true, nombre: true },
+  const pendientes = await prisma.pelicula.findMany({
+    where: forzar ? {} : { paleta: { none: {} } },
+    select: { id: true, tmdbId: true, titulo: true },
+    orderBy: { fechaEstreno: { sort: 'asc', nulls: 'last' } },
   });
 
-  for (const director of directores) {
-    const creditos = await prisma.creditoPelicula.findMany({
-      where: { personaId: director.id, rol: 'DIRECTOR' },
-      select: {
-        pelicula: {
-          select: { id: true, tmdbId: true, titulo: true, _count: { select: { paleta: true } } },
-        },
-      },
-    });
+  console.log(`${pendientes.length} películas a procesar\n`);
 
-    // Sin --force se saltean películas con paleta existente (job reanudable).
-    const pendientes = creditos
-      .map((c) => c.pelicula)
-      .filter((p) => forzar || p._count.paleta === 0);
+  let ok = 0;
+  let sinBackdrops = 0;
+  let errores = 0;
 
-    console.log(`\n${director.nombre}: ${pendientes.length} películas a procesar`);
-
-    const resultados = await Promise.allSettled(
-      pendientes.map((p) =>
-        limit(async () => {
+  await Promise.allSettled(
+    pendientes.map((p, i) =>
+      limit(async () => {
+        try {
           const colores = await extraerPaletaDePelicula(p);
-          console.log(`  ${colores > 0 ? '✓' : '○'} ${p.titulo} (${colores} colores)`);
-          return colores;
-        })
-      )
-    );
-
-    for (const [i, r] of resultados.entries()) {
-      if (r.status === 'rejected') {
-        console.error(`  ✗ ${pendientes[i]!.titulo}:`, (r.reason as Error).message);
-      }
-    }
-  }
+          if (colores > 0) ok++;
+          else sinBackdrops++;
+          console.log(`  ${colores > 0 ? '✓' : '○'} [${i + 1}/${pendientes.length}] ${p.titulo} (${colores} colores)`);
+        } catch (err) {
+          errores++;
+          console.error(`  ✗ [${i + 1}/${pendientes.length}] ${p.titulo}:`, (err as Error).message);
+        }
+      })
+    )
+  );
 
   const total = await prisma.colorPaleta.count();
-  console.log(`\nListo. Filas totales en ColorPaleta: ${total}`);
+  console.log(`\nListo: ${ok} con paleta, ${sinBackdrops} sin backdrops, ${errores} errores.`);
+  console.log(`Filas totales en ColorPaleta: ${total}`);
 }
 
 main()
