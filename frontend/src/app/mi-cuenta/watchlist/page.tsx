@@ -1,6 +1,7 @@
 'use client';
 
 import { PosterCard } from '@/components/pelicula/PosterCard';
+import { PosterGridSkeleton } from '@/components/ui/Skeleton';
 import { useListaPropia } from '@/lib/hooks/useListaPropia';
 
 interface Item {
@@ -15,7 +16,7 @@ interface Item {
 export default function MiWatchlist() {
   const { items, cargando } = useListaPropia<Item>('/usuarios/me/watchlist');
 
-  if (cargando) return <p className="font-mono text-sm text-papel/40">Cargando…</p>;
+  if (cargando) return <PosterGridSkeleton count={10} />;
   if (!items || items.length === 0) {
     return <p className="text-papel/60">Tu watchlist está vacía. Guardá películas para verlas después.</p>;
   }
