@@ -31,6 +31,9 @@ export function Header() {
           <Link href="/decadas" className={linkClase}>
             Décadas
           </Link>
+          <Link href="/juegos" className={linkClase}>
+            Juegos
+          </Link>
         </nav>
 
         {/* El buscador empuja la cuenta a la derecha. Suspense: usa useSearchParams. */}
