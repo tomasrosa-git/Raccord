@@ -90,6 +90,11 @@ class TmdbClient {
     // Sin `language`: las imágenes no dependen del idioma y filtrarlas lo vaciaría.
     return this.get(`/movie/${tmdbId}/images`);
   }
+
+  /** Detalle liviano (sin créditos ni fallback de idioma) — para backfills puntuales. */
+  getPeliculaBasica(tmdbId: number): Promise<TmdbPeliculaDetalle> {
+    return this.get(`/movie/${tmdbId}`, { language: IDIOMA });
+  }
 }
 
 let instancia: TmdbClient | null = null;

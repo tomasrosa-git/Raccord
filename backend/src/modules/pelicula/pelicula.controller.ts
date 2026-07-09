@@ -12,6 +12,14 @@ export const listar: RequestHandler = async (req, res, next) => {
   }
 };
 
+export const porDecada: RequestHandler = async (_req, res, next) => {
+  try {
+    res.json(await peliculaService.obtenerPorDecada());
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const detalle: RequestHandler = async (req, res, next) => {
   try {
     const { id } = parsear(idParamsSchema, req.params);

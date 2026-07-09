@@ -74,6 +74,7 @@ async function guardarPelicula(detalle: TmdbPeliculaDetalle) {
       duracionMin: detalle.runtime || null,
       posterUrl: detalle.poster_path ? tmdbImageUrl.poster(detalle.poster_path) : null,
       backdropUrl: detalle.backdrop_path ? tmdbImageUrl.backdrop(detalle.backdrop_path) : null,
+      popularity: detalle.popularity ?? null,
     },
     create: {
       tmdbId: detalle.id,
@@ -84,6 +85,7 @@ async function guardarPelicula(detalle: TmdbPeliculaDetalle) {
       duracionMin: detalle.runtime || null,
       posterUrl: detalle.poster_path ? tmdbImageUrl.poster(detalle.poster_path) : null,
       backdropUrl: detalle.backdrop_path ? tmdbImageUrl.backdrop(detalle.backdrop_path) : null,
+      popularity: detalle.popularity ?? null,
     },
   });
 
@@ -175,6 +177,7 @@ export const tmdbSyncService = {
         fechaNacimiento: datos.birthday ? new Date(datos.birthday) : null,
         lugarNacimiento: datos.place_of_birth,
         fotoUrl: datos.profile_path ? tmdbImageUrl.perfil(datos.profile_path) : null,
+        popularity: datos.popularity ?? null,
       },
       create: {
         tmdbId,
@@ -183,6 +186,7 @@ export const tmdbSyncService = {
         fechaNacimiento: datos.birthday ? new Date(datos.birthday) : null,
         lugarNacimiento: datos.place_of_birth,
         fotoUrl: datos.profile_path ? tmdbImageUrl.perfil(datos.profile_path) : null,
+        popularity: datos.popularity ?? null,
       },
     });
 

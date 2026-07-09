@@ -1,5 +1,11 @@
 import { apiGet } from './client';
-import type { ListadoPeliculas, PeliculaDetalle, PeliculaResumen, ColorSwatch } from '@/types';
+import type {
+  ListadoPeliculas,
+  PeliculaDetalle,
+  PeliculaResumen,
+  ColorSwatch,
+  DecadaPeliculas,
+} from '@/types';
 
 // Fichas: ISR de 1 hora. Listados: cache corto de 5 minutos.
 const REVALIDATE_FICHA = 3600;
@@ -24,4 +30,8 @@ export function getSimilares(id: string) {
 
 export function getPaleta(id: string) {
   return apiGet<ColorSwatch[]>(`/peliculas/${id}/paleta`, { revalidate: REVALIDATE_FICHA });
+}
+
+export function getPorDecada() {
+  return apiGet<DecadaPeliculas[]>('/peliculas/por-decada', { revalidate: REVALIDATE_FICHA });
 }

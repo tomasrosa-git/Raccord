@@ -7,6 +7,7 @@ export interface TmdbPersona {
   birthday: string | null;
   place_of_birth: string | null;
   profile_path: string | null;
+  popularity: number;
 }
 
 export interface TmdbResultadoBusquedaPersona {
@@ -54,6 +55,7 @@ export interface TmdbPeliculaDetalle {
   runtime: number | null;
   poster_path: string | null;
   backdrop_path: string | null;
+  popularity: number;
   genres: TmdbGenero[];
   credits?: TmdbCreditos;
 }

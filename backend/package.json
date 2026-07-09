@@ -14,7 +14,8 @@
     "prisma:studio": "prisma studio",
     "seed": "tsx prisma/seed.ts",
     "seed:premios": "tsx prisma/seed-premios.ts",
-    "paletas": "tsx src/jobs/extraerPaletas.job.ts"
+    "paletas": "tsx src/jobs/extraerPaletas.job.ts",
+    "popularidad": "tsx src/jobs/backfillPopularidad.job.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -3,6 +3,7 @@ export const API_PREFIX = '/api';
 export const CACHE_TTL_SEGUNDOS = {
   colaboradores: 3600,
   firmaVisual: 3600,
+  decadas: 3600,
 } as const;
 
 export const RATE_LIMIT_LOGIN = {

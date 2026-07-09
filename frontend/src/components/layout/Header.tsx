@@ -28,6 +28,9 @@ export function Header() {
           <Link href="/directores" className={linkClase}>
             Directores
           </Link>
+          <Link href="/decadas" className={linkClase}>
+            Décadas
+          </Link>
         </nav>
 
         {/* El buscador empuja la cuenta a la derecha. Suspense: usa useSearchParams. */}

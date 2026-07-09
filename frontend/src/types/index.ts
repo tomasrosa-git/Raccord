@@ -32,6 +32,11 @@ export interface ListadoPeliculas {
   totalPaginas: number;
 }
 
+export interface DecadaPeliculas {
+  decada: number;
+  peliculas: PeliculaResumen[];
+}
+
 export interface PeliculaDetalle {
   id: string;
   tmdbId: number;
