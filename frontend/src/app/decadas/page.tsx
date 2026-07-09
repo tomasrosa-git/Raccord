@@ -29,7 +29,7 @@ export default async function PaginaDecadas() {
         <p className="mt-12 text-papel/60">Todavía no hay datos de popularidad.</p>
       ) : (
         <div className="mt-14 space-y-16">
-          {decadas.map(({ decada, peliculas }) => (
+          {decadas.map(({ decada, peliculas }, indiceDecada) => (
             <section key={decada}>
               <div className="flex items-baseline gap-4">
                 <h2 className="font-display text-2xl sm:text-3xl">{nombreDecada(decada)}</h2>
@@ -39,9 +39,10 @@ export default async function PaginaDecadas() {
               </div>
               {/* Tira tipo contact sheet, como la filmografía de los perfiles. */}
               <div className="mt-6 flex gap-px overflow-x-auto bg-borde pb-2">
-                {peliculas.map((p) => (
+                {peliculas.map((p, i) => (
                   <div key={p.id} className="w-36 shrink-0 bg-negro-sala pr-3 sm:w-44">
-                    <PosterCard pelicula={p} />
+                    {/* Solo la primera tira entra sin scrollear. */}
+                    <PosterCard pelicula={p} prioridad={indiceDecada === 0 && i < 4} />
                   </div>
                 ))}
               </div>

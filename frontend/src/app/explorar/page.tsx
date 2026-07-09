@@ -85,8 +85,9 @@ export default async function PaginaExplorar({ searchParams }: Props) {
         <p className="mt-12 text-papel/60">No hay películas con esos filtros.</p>
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {listado.items.map((p) => (
-            <PosterCard key={p.id} pelicula={p} />
+          {listado.items.map((p, i) => (
+            // La primera fila (hasta 5 en desktop) entra sin scrollear.
+            <PosterCard key={p.id} pelicula={p} prioridad={i < 5} />
           ))}
         </div>
       )}
