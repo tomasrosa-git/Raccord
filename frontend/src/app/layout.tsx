@@ -24,13 +24,29 @@ const plexMono = IBM_Plex_Mono({
   display: 'swap',
 });
 
+const DESCRIPCION =
+  'Plataforma sobre cine de autor con el director como eje: filmografías, colaboradores frecuentes y la firma visual de cada cineasta.';
+
 export const metadata: Metadata = {
+  metadataBase: new URL('https://raccord.com.ar'),
   title: {
     default: 'Raccord — cine de autor',
     template: '%s · Raccord',
   },
-  description:
-    'Plataforma sobre cine de autor con el director como eje: filmografías, colaboradores frecuentes y la firma visual de cada cineasta.',
+  description: DESCRIPCION,
+  openGraph: {
+    type: 'website',
+    siteName: 'Raccord',
+    title: 'Raccord — cine de autor',
+    description: DESCRIPCION,
+    url: 'https://raccord.com.ar',
+    locale: 'es_AR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Raccord — cine de autor',
+    description: DESCRIPCION,
+  },
 };
 
 export default function RootLayout({
