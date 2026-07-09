@@ -5,9 +5,14 @@ import { anioDe } from '@/lib/utils/formatters';
 /**
  * Miniatura de película para tiras de contact sheet y grillas.
  * Sobria a propósito: la personalidad vive en heros y perfiles.
+ *
+ * `prioridad` desactiva el lazy-load y pide la imagen con prioridad alta: solo
+ * para las miniaturas visibles sin scrollear (son las candidatas a LCP). Usarlo
+ * de más perjudica, porque compite con el resto de la carga inicial.
  */
 export function PosterCard({
   pelicula,
+  prioridad = false,
 }: {
   pelicula: {
     id: string;
@@ -15,6 +20,7 @@ export function PosterCard({
     fechaEstreno: string | null;
     posterUrl: string | null;
   };
+  prioridad?: boolean;
 }) {
   const anio = anioDe(pelicula.fechaEstreno);
   return (
@@ -25,6 +31,7 @@ export function PosterCard({
             src={pelicula.posterUrl}
             alt={`Póster de ${pelicula.titulo}`}
             fill
+            priority={prioridad}
             sizes="(max-width: 640px) 40vw, 180px"
             className="object-cover transition-opacity group-hover:opacity-80"
           />
