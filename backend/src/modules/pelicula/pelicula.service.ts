@@ -1,8 +1,11 @@
 import { AppError } from '../../shared/errors/AppError';
+import { conCache } from '../../shared/utils/cache';
+import { CACHE_TTL_SEGUNDOS } from '../../config/constants';
 import { peliculaRepository } from './pelicula.repository';
 import type { ListarPeliculasQuery } from './pelicula.schema';
 
 const MAX_SIMILARES = 10;
+const TOP_POR_DECADA = 6;
 
 export const peliculaService = {
   async listar(query: ListarPeliculasQuery) {
@@ -83,5 +86,36 @@ export const peliculaService = {
     const existe = await peliculaRepository.existe(id);
     if (!existe) throw AppError.notFound('Película no encontrada');
     return peliculaRepository.buscarPaleta(id);
+  },
+
+  /**
+   * "Lo más importante por década": top de películas por popularidad de TMDB,
+   * agrupadas por década de estreno, en orden cronológico. A esta escala
+   * (cientos de películas) el agrupado en memoria + cache alcanza de sobra.
+   */
+  obtenerPorDecada() {
+    return conCache('peliculas:por-decada', CACHE_TTL_SEGUNDOS.decadas, async () => {
+      const peliculas = await peliculaRepository.listarConPopularidad();
+
+      const porDecada = new Map<number, typeof peliculas>();
+      for (const p of peliculas) {
+        const decada = Math.floor(p.fechaEstreno!.getFullYear() / 10) * 10;
+        if (!porDecada.has(decada)) porDecada.set(decada, []);
+        porDecada.get(decada)!.push(p);
+      }
+
+      return [...porDecada.entries()]
+        .sort(([a], [b]) => a - b)
+        .map(([decada, pelis]) => ({
+          decada,
+          peliculas: pelis
+            .sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0))
+            .slice(0, TOP_POR_DECADA)
+            .map(({ popularity: _p, generos, ...datos }) => ({
+              ...datos,
+              generos: generos.map((g) => g.genero.nombre),
+            })),
+        }));
+    });
   },
 };

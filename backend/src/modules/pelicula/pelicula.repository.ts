@@ -43,6 +43,14 @@ export const peliculaRepository = {
     return { items, total };
   },
 
+  /** Películas con fecha y popularidad conocidas — insumo de "por década". */
+  listarConPopularidad() {
+    return prisma.pelicula.findMany({
+      where: { popularity: { not: null }, fechaEstreno: { not: null } },
+      select: { ...resumenSelect, popularity: true },
+    });
+  },
+
   buscarDetallePorId(id: string) {
     return prisma.pelicula.findUnique({
       where: { id },
