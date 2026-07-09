@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useListaPropia } from '@/lib/hooks/useListaPropia';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { anioDe } from '@/lib/utils/formatters';
 
 interface Item {
@@ -16,7 +17,19 @@ interface Item {
 export default function MisReviews() {
   const { items, cargando } = useListaPropia<Item>('/usuarios/me/reviews');
 
-  if (cargando) return <p className="font-mono text-sm text-papel/40">Cargando…</p>;
+  if (cargando) {
+    return (
+      <ul>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <li key={i} className="border-b border-borde py-5">
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="mt-3 h-3 w-full max-w-2xl" />
+            <Skeleton className="mt-2 h-3 w-2/3 max-w-2xl" />
+          </li>
+        ))}
+      </ul>
+    );
+  }
   if (!items || items.length === 0) {
     return <p className="text-papel/60">Todavía no escribiste reseñas.</p>;
   }
