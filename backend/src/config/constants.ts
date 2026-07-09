@@ -10,4 +10,13 @@ export const RATE_LIMIT_LOGIN = {
   max: 5,
 } as const;
 
+// Límite general de la API pública: guardia contra scraping/abuso masivo, no
+// throttle fino por usuario. Generoso a propósito porque el frontend hace
+// fetches server-side (ISR) que salen con la IP del server y se agregan bajo
+// una sola IP; con ISR cacheando, ese volumen es bajo y no roza este techo.
+export const RATE_LIMIT_API = {
+  windowMs: 60 * 1000, // 1 minuto
+  max: 300,
+} as const;
+
 export const TMDB_MAX_CONCURRENCIA = 4;
