@@ -26,3 +26,21 @@ export async function apiGet<T>(
   }
   return res.json() as Promise<T>;
 }
+
+/** POST tipado, sin cache. Para acciones — ej. los intentos de los juegos. */
+export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`${API_URL}/api${path}`, {
+    method: 'POST',
+    cache: 'no-store',
+    ...(body !== undefined && {
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }),
+  });
+
+  if (!res.ok) {
+    const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new ApiError(res.status, cuerpo?.error ?? `Error ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}

@@ -37,6 +37,24 @@ export interface DecadaPeliculas {
   peliculas: PeliculaResumen[];
 }
 
+export interface FrameGuessHoy {
+  fecha: string; // "YYYY-MM-DD" en hora de Argentina
+  backdropUrl: string;
+  maxIntentos: number;
+}
+
+export interface FrameGuessSolucion {
+  id: string;
+  titulo: string;
+  fechaEstreno: string | null;
+  posterUrl: string | null;
+}
+
+export interface FrameGuessIntento {
+  correcto: boolean;
+  solucion: FrameGuessSolucion | null;
+}
+
 export interface PeliculaDetalle {
   id: string;
   tmdbId: number;
