@@ -18,6 +18,7 @@ import { busquedaRouter } from './modules/busqueda/busqueda.routes';
 import { statsRouter } from './modules/stats/stats.routes';
 import { premioRouter } from './modules/premios/premios.routes';
 import { requireAuth } from './middlewares/auth.middleware';
+import { apiRateLimiter } from './middlewares/rateLimiter';
 
 export const app = express();
 
@@ -39,6 +40,9 @@ app.use(cookieParser());
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
+
+// Rate limit general de la API (el /health queda afuera para los checks de Render).
+app.use('/api', apiRateLimiter);
 
 app.use('/api/auth', authRouter);
 app.use('/api/buscar', busquedaRouter);
