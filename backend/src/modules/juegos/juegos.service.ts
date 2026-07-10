@@ -72,6 +72,68 @@ export const juegosService = {
   },
 };
 
+// --- Duelo de popularidad -------------------------------------------------
+
+/**
+ * Diferencia mínima de popularidad entre las dos películas de un duelo. Sin
+ * esto, ~8% de los pares aleatorios quedan tan parejos que acertar es cuestión
+ * de suerte, no de criterio.
+ */
+const RATIO_MINIMO = 1.2;
+const INTENTOS_PAR = 40;
+
+const alAzar = <T>(items: T[]): T => items[Math.floor(Math.random() * items.length)]!;
+
+type PeliculaDuelo = Awaited<ReturnType<typeof juegosRepository.peliculasParaDuelo>>[number];
+
+async function poolDuelo() {
+  const pool = await conCache('juegos:pool-duelo', CACHE_TTL_SEGUNDOS.juegos, () =>
+    juegosRepository.peliculasParaDuelo()
+  );
+  if (pool.length < 2) throw AppError.notFound('No hay suficientes películas para el duelo');
+  return pool;
+}
+
+/** Sin la popularidad: es justo lo que el jugador tiene que adivinar. */
+const sinPopularidad = ({ popularity: _p, ...datos }: PeliculaDuelo) => datos;
+
+export const duelo = {
+  async nuevaRonda() {
+    const pool = await poolDuelo();
+
+    let a = alAzar(pool);
+    let b = alAzar(pool);
+    for (let i = 0; i < INTENTOS_PAR; i++) {
+      const ratio = Math.max(a.popularity!, b.popularity!) / Math.min(a.popularity!, b.popularity!);
+      if (a.id !== b.id && Number.isFinite(ratio) && ratio >= RATIO_MINIMO) break;
+      a = alAzar(pool);
+      b = alAzar(pool);
+    }
+
+    return { a: sinPopularidad(a), b: sinPopularidad(b) };
+  },
+
+  /** Valida la elección contra la popularidad real, que nunca salió del server. */
+  async resolver(aId: string, bId: string, elegidaId: string) {
+    if (aId === bId) throw AppError.badRequest('Las películas del duelo deben ser distintas');
+    if (elegidaId !== aId && elegidaId !== bId) {
+      throw AppError.badRequest('La elección debe ser una de las dos películas');
+    }
+
+    const pool = await poolDuelo();
+    const a = pool.find((p) => p.id === aId);
+    const b = pool.find((p) => p.id === bId);
+    if (!a || !b) throw AppError.notFound('Película no encontrada en el duelo');
+
+    const ganadora = a.popularity! >= b.popularity! ? a : b;
+    return {
+      correcto: ganadora.id === elegidaId,
+      ganadoraId: ganadora.id,
+      popularidad: { [a.id]: a.popularity, [b.id]: b.popularity } as Record<string, number | null>,
+    };
+  },
+};
+
 function solucionDe(pelicula: Awaited<ReturnType<typeof peliculaDelDia>>) {
   return {
     id: pelicula.id,

@@ -1,5 +1,11 @@
 import { apiGet, apiPost } from './client';
-import type { FrameGuessHoy, FrameGuessIntento, FrameGuessSolucion } from '@/types';
+import type {
+  FrameGuessHoy,
+  FrameGuessIntento,
+  FrameGuessSolucion,
+  DueloRonda,
+  DueloResultado,
+} from '@/types';
 
 /** El fotograma del día. Sin cache: cambia a medianoche (hora Argentina). */
 export function getFrameGuessHoy() {
@@ -12,4 +18,13 @@ export function intentarFrameGuess(peliculaId: string) {
 
 export function getFrameGuessSolucion() {
   return apiPost<FrameGuessSolucion>('/juegos/frame-guess/solucion');
+}
+
+/** Duelo de popularidad: la ronda no trae la popularidad — es lo que se adivina. */
+export function getDueloRonda() {
+  return apiGet<DueloRonda>('/juegos/duelo/ronda', { sinCache: true });
+}
+
+export function resolverDuelo(aId: string, bId: string, elegidaId: string) {
+  return apiPost<DueloResultado>('/juegos/duelo/resolver', { aId, bId, elegidaId });
 }

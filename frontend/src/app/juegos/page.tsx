@@ -14,11 +14,11 @@ const JUEGOS = [
     disponible: true,
   },
   {
-    href: '#',
+    href: '/juegos/duelo',
     nombre: 'Duelo de popularidad',
     descripcion: 'Dos películas del catálogo: adiviná cuál es más popular hoy. Hasta que falles.',
     cadencia: 'Partidas ilimitadas',
-    disponible: false,
+    disponible: true,
   },
 ];
 
