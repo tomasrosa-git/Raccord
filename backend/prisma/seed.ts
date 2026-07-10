@@ -48,6 +48,63 @@ const DIRECTORES: { nombre: string; curado?: boolean; tmdbId?: number; nombreFor
   { nombre: 'Quentin Tarantino', tmdbId: 138 },
   { nombre: 'Martin Scorsese', tmdbId: 1032 },
   { nombre: 'Paul Thomas Anderson', tmdbId: 4762 },
+
+  // --- Tercera tanda (Fase 15): 48 autores mayores que faltaban, para dar
+  //     profundidad histórica y geográfica. IDs resueltos vía TMDB y
+  //     verificados por departamento (Directing) + descartando los ya presentes.
+  //     Clásicos europeos
+  { nombre: 'Ingmar Bergman', tmdbId: 6648 },
+  { nombre: 'François Truffaut', tmdbId: 1650 },
+  { nombre: 'Michelangelo Antonioni', tmdbId: 15189 },
+  { nombre: 'Robert Bresson', tmdbId: 10346 },
+  { nombre: 'Jean Renoir', tmdbId: 11528 },
+  { nombre: 'Luchino Visconti', tmdbId: 15127 },
+  { nombre: 'Vittorio De Sica', tmdbId: 12329 },
+  { nombre: 'Roberto Rossellini', tmdbId: 4410 },
+  { nombre: 'Pier Paolo Pasolini', tmdbId: 5970 },
+  { nombre: 'Jacques Tati', tmdbId: 5763 },
+  { nombre: 'Louis Malle', tmdbId: 15389 },
+  { nombre: 'Jacques Demy', tmdbId: 24882 },
+  { nombre: 'Andrzej Wajda', tmdbId: 2801 },
+  { nombre: 'Chantal Akerman', tmdbId: 130030 },
+  { nombre: 'Béla Tarr', tmdbId: 85637, nombreForzado: true },
+  //     Alemania / norte / este de Europa
+  { nombre: 'Rainer Werner Fassbinder', tmdbId: 2725 },
+  { nombre: 'Werner Herzog', tmdbId: 6818 },
+  { nombre: 'Michael Haneke', tmdbId: 6011 },
+  { nombre: 'Ruben Östlund', tmdbId: 56370 },
+  { nombre: 'Paweł Pawlikowski', tmdbId: 64194 },
+  { nombre: 'Cristian Mungiu', tmdbId: 20657 },
+  //     Asia
+  { nombre: 'Yasujirō Ozu', tmdbId: 95501 },
+  { nombre: 'Kenji Mizoguchi', tmdbId: 97202 },
+  { nombre: 'Hirokazu Kore-eda', tmdbId: 25645, nombreForzado: true },
+  { nombre: 'Edward Yang', tmdbId: 143035, nombreForzado: true },
+  { nombre: 'Ang Lee', tmdbId: 1614 },
+  { nombre: 'Satyajit Ray', tmdbId: 12160 },
+  { nombre: 'Asghar Farhadi', tmdbId: 229931 },
+  { nombre: 'Nuri Bilge Ceylan', tmdbId: 56214 },
+  //     Estados Unidos
+  { nombre: 'Terrence Malick', tmdbId: 30715 },
+  { nombre: 'David Fincher', tmdbId: 7467 },
+  { nombre: 'Christopher Nolan', tmdbId: 525 },
+  { nombre: 'Robert Altman', tmdbId: 9789 },
+  { nombre: 'John Cassavetes', tmdbId: 11147 },
+  { nombre: 'Jim Jarmusch', tmdbId: 4429 },
+  { nombre: 'Orson Welles', tmdbId: 40 },
+  { nombre: 'Billy Wilder', tmdbId: 3146 },
+  { nombre: 'Sidney Lumet', tmdbId: 39996 },
+  { nombre: 'Charlie Kaufman', tmdbId: 202 },
+  { nombre: 'Ari Aster', tmdbId: 1145520 },
+  { nombre: 'Robert Eggers', tmdbId: 138781 },
+  { nombre: 'Jordan Peele', tmdbId: 291263 },
+  { nombre: 'Richard Linklater', tmdbId: 564 },
+  //     Latinoamérica
+  { nombre: 'Carlos Reygadas', tmdbId: 20660 },
+  { nombre: 'Fernando Meirelles', tmdbId: 8557 },
+  { nombre: 'Lisandro Alonso', tmdbId: 1002601 },
+  { nombre: 'Gaspar Noé', tmdbId: 14597 },
+  { nombre: 'Alejandro Jodorowsky', tmdbId: 55119 },
 ];
 
 /** true si la persona ya está sincronizada como director (tiene créditos de dirección). */
