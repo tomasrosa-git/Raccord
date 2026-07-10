@@ -5,6 +5,9 @@ import type {
   FrameGuessSolucion,
   DueloRonda,
   DueloResultado,
+  IntrusoRonda,
+  IntrusoResultado,
+  CategoriaIntruso,
 } from '@/types';
 
 /** El fotograma del día. Sin cache: cambia a medianoche (hora Argentina). */
@@ -27,4 +30,13 @@ export function getDueloRonda() {
 
 export function resolverDuelo(aId: string, bId: string, elegidaId: string) {
   return apiPost<DueloResultado>('/juegos/duelo/resolver', { aId, bId, elegidaId });
+}
+
+/** El Intruso: la ronda no dice cuál es la intrusa — se valida en el server. */
+export function getIntrusoRonda() {
+  return apiGet<IntrusoRonda>('/juegos/intruso/ronda', { sinCache: true });
+}
+
+export function resolverIntruso(ids: string[], categoria: CategoriaIntruso, elegidaId: string) {
+  return apiPost<IntrusoResultado>('/juegos/intruso/resolver', { ids, categoria, elegidaId });
 }

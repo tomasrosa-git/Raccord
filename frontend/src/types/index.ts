@@ -74,6 +74,25 @@ export interface DueloResultado {
   popularidad: Record<string, number | null>;
 }
 
+export type CategoriaIntruso = 'director' | 'protagonista' | 'decada' | 'genero';
+
+export interface IntrusoPelicula {
+  id: string;
+  titulo: string;
+  posterUrl: string | null;
+}
+
+export interface IntrusoRonda {
+  categoria: CategoriaIntruso;
+  etiqueta: string;
+  peliculas: IntrusoPelicula[];
+}
+
+export interface IntrusoResultado {
+  correcto: boolean;
+  intrusaId: string;
+}
+
 export interface PeliculaDetalle {
   id: string;
   tmdbId: number;
