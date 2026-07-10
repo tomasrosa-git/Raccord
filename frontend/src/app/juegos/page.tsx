@@ -4,13 +4,15 @@ import { EtiquetaSeccion } from '@/components/ui/EtiquetaSeccion';
 
 export const metadata: Metadata = { title: 'Juegos' };
 
+// Frame Guess quedó oculto por ahora (demasiado difícil); su ruta y código
+// siguen en /juegos/frame-guess para reactivarlo agregándolo de nuevo acá.
 const JUEGOS = [
   {
-    href: '/juegos/frame-guess',
-    nombre: 'Frame Guess',
+    href: '/juegos/intruso',
+    nombre: 'El intruso',
     descripcion:
-      'Un fotograma desenfocado, cinco intentos. Cada fallo revela un poco más de la imagen.',
-    cadencia: 'Uno nuevo por día',
+      'Cuatro películas: tres comparten director, protagonista, década o género. Encontrá la que no encaja.',
+    cadencia: 'Partidas ilimitadas',
     disponible: true,
   },
   {

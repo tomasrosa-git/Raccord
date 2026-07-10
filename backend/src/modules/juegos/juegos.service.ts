@@ -142,3 +142,161 @@ function solucionDe(pelicula: Awaited<ReturnType<typeof peliculaDelDia>>) {
     posterUrl: pelicula.posterUrl,
   };
 }
+
+// --- El Intruso -----------------------------------------------------------
+
+export const CATEGORIAS_INTRUSO = ['director', 'protagonista', 'decada', 'genero'] as const;
+export type CategoriaIntruso = (typeof CATEGORIAS_INTRUSO)[number];
+
+/** Texto que se le muestra al jugador: "Tres de estas cuatro …". */
+const ETIQUETA_INTRUSO: Record<CategoriaIntruso, string> = {
+  director: 'comparten director',
+  protagonista: 'comparten protagonista',
+  decada: 'son de la misma década',
+  genero: 'comparten género',
+};
+
+const INTENTOS_RONDA = 60;
+
+interface PeliIntruso {
+  id: string;
+  titulo: string;
+  posterUrl: string | null;
+  directorIds: string[];
+  protagIds: string[];
+  generoIds: string[];
+  decada: number | null;
+}
+
+/** Valores por los que agrupa cada categoría (un director, varios géneros, etc.). */
+function valoresDe(p: PeliIntruso, cat: CategoriaIntruso): (string | number)[] {
+  switch (cat) {
+    case 'director':
+      return p.directorIds;
+    case 'protagonista':
+      return p.protagIds;
+    case 'genero':
+      return p.generoIds;
+    case 'decada':
+      return p.decada != null ? [p.decada] : [];
+  }
+}
+
+/**
+ * Dadas 4 películas y una categoría, la intrusa es la única que no comparte el
+ * valor que las otras tres sí. Devuelve null si la ronda es ambigua (ningún
+ * valor aparece en exactamente 3, o aparece más de uno) — eso descarta la
+ * combinación al armarla.
+ */
+function calcularIntrusa(cuatro: PeliIntruso[], cat: CategoriaIntruso): string | null {
+  const frecuencia = new Map<string | number, number>();
+  for (const peli of cuatro) {
+    for (const valor of new Set(valoresDe(peli, cat))) {
+      frecuencia.set(valor, (frecuencia.get(valor) ?? 0) + 1);
+    }
+  }
+  const enTres = [...frecuencia.entries()].filter(([, n]) => n === 3).map(([v]) => v);
+  if (enTres.length !== 1) return null;
+
+  const comun = enTres[0]!;
+  const intrusas = cuatro.filter((p) => !valoresDe(p, cat).includes(comun));
+  return intrusas.length === 1 ? intrusas[0]!.id : null;
+}
+
+async function catalogoIntruso(): Promise<PeliIntruso[]> {
+  return conCache('juegos:catalogo-intruso', CACHE_TTL_SEGUNDOS.juegos, async () => {
+    const pelis = await juegosRepository.peliculasParaIntruso();
+    return pelis.map((p) => ({
+      id: p.id,
+      titulo: p.titulo,
+      posterUrl: p.posterUrl,
+      directorIds: p.creditos.filter((c) => c.rol === 'DIRECTOR').map((c) => c.personaId),
+      protagIds: p.creditos.filter((c) => c.rol === 'ACTOR').map((c) => c.personaId),
+      generoIds: p.generos.map((g) => g.generoId),
+      decada: p.fechaEstreno ? Math.floor(p.fechaEstreno.getFullYear() / 10) * 10 : null,
+    }));
+  });
+}
+
+function mezclar<T>(items: T[]): T[] {
+  const copia = [...items];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copia[i], copia[j]] = [copia[j]!, copia[i]!];
+  }
+  return copia;
+}
+
+/** Intenta armar una ronda 3+1 inequívoca para una categoría; null si no puede. */
+function armarRonda(catalogo: PeliIntruso[], cat: CategoriaIntruso): PeliIntruso[] | null {
+  // valor → películas que lo tienen; grupos = valores presentes en >= 3.
+  const porValor = new Map<string | number, PeliIntruso[]>();
+  for (const peli of catalogo) {
+    for (const valor of new Set(valoresDe(peli, cat))) {
+      (porValor.get(valor) ?? porValor.set(valor, []).get(valor)!).push(peli);
+    }
+  }
+  const grupos = [...porValor.entries()].filter(([, pelis]) => pelis.length >= 3);
+  if (grupos.length === 0) return null;
+
+  for (let intento = 0; intento < INTENTOS_RONDA; intento++) {
+    const [valor, pelis] = grupos[Math.floor(Math.random() * grupos.length)]!;
+    const tres = mezclar(pelis).slice(0, 3);
+    const usados = new Set(tres.map((p) => p.id));
+
+    const intrusas = catalogo.filter(
+      (p) => !usados.has(p.id) && !valoresDe(p, cat).includes(valor)
+    );
+    if (intrusas.length === 0) continue;
+    const intrusa = intrusas[Math.floor(Math.random() * intrusas.length)]!;
+
+    const cuatro = mezclar([...tres, intrusa]);
+    // Auto-verificación: la combinación tiene que resolver a esta misma intrusa,
+    // sin ambigüedad. Si otra terna comparte otro valor, se descarta y reintenta.
+    if (calcularIntrusa(cuatro, cat) === intrusa.id) return cuatro;
+  }
+  return null;
+}
+
+const sinAtributos = (p: PeliIntruso) => ({ id: p.id, titulo: p.titulo, posterUrl: p.posterUrl });
+
+export const intruso = {
+  async nuevaRonda() {
+    const catalogo = await catalogoIntruso();
+    if (catalogo.length < 4) throw AppError.notFound('No hay suficientes películas para el juego');
+
+    // Se prueban las categorías en orden aleatorio hasta que una arme ronda.
+    for (const cat of mezclar([...CATEGORIAS_INTRUSO])) {
+      const cuatro = armarRonda(catalogo, cat);
+      if (cuatro) {
+        return {
+          categoria: cat,
+          etiqueta: ETIQUETA_INTRUSO[cat],
+          peliculas: cuatro.map(sinAtributos),
+        };
+      }
+    }
+    throw AppError.notFound('No se pudo armar una ronda');
+  },
+
+  /** Re-deriva la intrusa desde el catálogo: cuál es nunca viajó al cliente. */
+  async resolver(ids: string[], categoria: CategoriaIntruso, elegidaId: string) {
+    const unicos = new Set(ids);
+    if (ids.length !== 4 || unicos.size !== 4) {
+      throw AppError.badRequest('La ronda debe tener cuatro películas distintas');
+    }
+    if (!unicos.has(elegidaId)) {
+      throw AppError.badRequest('La elección debe ser una de las cuatro películas');
+    }
+
+    const catalogo = await catalogoIntruso();
+    const porId = new Map(catalogo.map((p) => [p.id, p]));
+    const cuatro = ids.map((id) => porId.get(id));
+    if (cuatro.some((p) => !p)) throw AppError.notFound('Película no encontrada en la ronda');
+
+    const intrusaId = calcularIntrusa(cuatro as PeliIntruso[], categoria);
+    if (!intrusaId) throw AppError.badRequest('Ronda inválida');
+
+    return { correcto: intrusaId === elegidaId, intrusaId };
+  },
+};

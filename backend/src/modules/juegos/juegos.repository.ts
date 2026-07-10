@@ -11,6 +11,13 @@ const POOL_FRAME_GUESS = 200;
 /** Duración mínima: deja afuera los cortos, que el catálogo tiene muchos. */
 const MIN_DURACION_MIN = 60;
 
+/**
+ * Piso de popularidad para El Intruso: el juego exige reconocer las películas,
+ * así que se acota a títulos conocidos. Sin esto entran rarezas ilocalizables
+ * ("Historias Breves 1") y el juego se vuelve tan difícil como Frame Guess.
+ */
+const MIN_POPULARIDAD_INTRUSO = 2.5;
+
 export const juegosRepository = {
   /**
    * Pool de películas elegibles para Frame Guess: largometrajes con fotograma,
@@ -46,6 +53,34 @@ export const juegosRepository = {
         duracionMin: { gte: MIN_DURACION_MIN },
       },
       select: { id: true, titulo: true, posterUrl: true, fechaEstreno: true, popularity: true },
+    });
+  },
+
+  /**
+   * Catálogo liviano para El Intruso: cada película con póster junto con los
+   * atributos por los que se puede agrupar (director, protagonistas, géneros,
+   * década). Se carga una vez (cacheado en el service) y las rondas se arman en
+   * memoria, sin pegarle a la DB por ronda.
+   */
+  peliculasParaIntruso() {
+    return prisma.pelicula.findMany({
+      where: {
+        posterUrl: { not: null },
+        duracionMin: { gte: MIN_DURACION_MIN },
+        popularity: { gte: MIN_POPULARIDAD_INTRUSO },
+      },
+      select: {
+        id: true,
+        titulo: true,
+        posterUrl: true,
+        fechaEstreno: true,
+        generos: { select: { generoId: true } },
+        // Solo lo que sirve para agrupar: directores y actores protagónicos.
+        creditos: {
+          where: { OR: [{ rol: 'DIRECTOR' }, { rol: 'ACTOR', orden: { lt: 3 } }] },
+          select: { personaId: true, rol: true },
+        },
+      },
     });
   },
 };
