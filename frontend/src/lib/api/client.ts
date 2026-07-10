@@ -10,12 +10,17 @@ export class ApiError extends Error {
   }
 }
 
-/** GET tipado contra la API de Raccord. `revalidate` controla el cache de Next. */
+/**
+ * GET tipado contra la API de Raccord. `revalidate` controla el cache de Next;
+ * `sinCache` lo desactiva por completo (para respuestas que cambian en cada
+ * pedido, como una ronda aleatoria: si el navegador la cachea, se repite).
+ */
 export async function apiGet<T>(
   path: string,
-  opciones: { revalidate?: number; token?: string } = {}
+  opciones: { revalidate?: number; token?: string; sinCache?: boolean } = {}
 ): Promise<T> {
   const res = await fetch(`${API_URL}/api${path}`, {
+    ...(opciones.sinCache && { cache: 'no-store' }),
     ...(opciones.revalidate !== undefined && { next: { revalidate: opciones.revalidate } }),
     headers: opciones.token ? { Authorization: `Bearer ${opciones.token}` } : undefined,
   });

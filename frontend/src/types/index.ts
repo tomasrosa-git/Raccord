@@ -55,6 +55,25 @@ export interface FrameGuessIntento {
   solucion: FrameGuessSolucion | null;
 }
 
+export interface DueloPelicula {
+  id: string;
+  titulo: string;
+  posterUrl: string | null;
+  fechaEstreno: string | null;
+}
+
+export interface DueloRonda {
+  a: DueloPelicula;
+  b: DueloPelicula;
+}
+
+export interface DueloResultado {
+  correcto: boolean;
+  ganadoraId: string;
+  /** popularidad de cada película del duelo, por id */
+  popularidad: Record<string, number | null>;
+}
+
 export interface PeliculaDetalle {
   id: string;
   tmdbId: number;

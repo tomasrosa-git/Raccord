@@ -32,4 +32,20 @@ export const juegosRepository = {
 
     return populares.sort((a, b) => a.id.localeCompare(b.id));
   },
+
+  /**
+   * Pool del Duelo de popularidad: largometrajes con póster y popularidad.
+   * Acá no se acota a los más populares — comparar dos títulos no exige
+   * recordarlos, así que la variedad suma.
+   */
+  peliculasParaDuelo() {
+    return prisma.pelicula.findMany({
+      where: {
+        posterUrl: { not: null },
+        popularity: { not: null },
+        duracionMin: { gte: MIN_DURACION_MIN },
+      },
+      select: { id: true, titulo: true, posterUrl: true, fechaEstreno: true, popularity: true },
+    });
+  },
 };
