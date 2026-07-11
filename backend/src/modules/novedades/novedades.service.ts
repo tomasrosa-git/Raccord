@@ -55,15 +55,19 @@ function aNovedad(p: TmdbPeliculaListado, catalogo: Map<number, string>): Noveda
   };
 }
 
-/** El mejor tráiler de una película: YouTube, preferentemente oficial y en español. */
+/**
+ * El mejor tráiler de una película: YouTube, en versión original (inglés)
+ * porque el player de la home fuerza subtítulos en español; oficial y más
+ * reciente como desempate. Si no hay VO en inglés, cae al que haya (es).
+ */
 function elegirTrailer(videos: TmdbVideo[]): TmdbVideo | null {
   const candidatos = videos
     .filter((v) => v.site === 'YouTube' && v.type === 'Trailer')
     .sort((a, b) => {
-      const esEs = (v: TmdbVideo) => Number(v.iso_639_1 === 'es');
+      const esEn = (v: TmdbVideo) => Number(v.iso_639_1 === 'en');
       const oficial = (v: TmdbVideo) => Number(v.official);
       return (
-        esEs(b) - esEs(a) ||
+        esEn(b) - esEn(a) ||
         oficial(b) - oficial(a) ||
         b.published_at.localeCompare(a.published_at)
       );

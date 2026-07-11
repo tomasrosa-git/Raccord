@@ -12,8 +12,9 @@ import type { TrailerNovedad } from '@/types';
  * La sala: los últimos tráilers proyectados dentro del letterbox de la home.
  * La pantalla arranca apagada (solo el fotograma y el botón de play): el
  * iframe de YouTube recién se carga al primer play, para no traer scripts de
- * terceros a quien no va a reproducir nada. Nada se reproduce solo: encender
- * la sala o cambiar de tráiler deja el player de YouTube en pausa.
+ * terceros a quien no va a reproducir nada. Encender la sala o elegir otro
+ * tráiler reproduce al toque (siempre detrás de un clic del usuario), en
+ * versión original con subtítulos en español forzados desde el player.
  */
 export function SalaTrailers({ trailers }: { trailers: TrailerNovedad[] }) {
   const [sel, setSel] = useState(0);
@@ -44,9 +45,9 @@ export function SalaTrailers({ trailers }: { trailers: TrailerNovedad[] }) {
               {encendida ? (
                 <iframe
                   key={actual.youtubeKey}
-                  src={`https://www.youtube-nocookie.com/embed/${actual.youtubeKey}?rel=0`}
+                  src={`https://www.youtube-nocookie.com/embed/${actual.youtubeKey}?autoplay=1&rel=0&cc_load_policy=1&cc_lang_pref=es&hl=es`}
                   title={`Tráiler de ${actual.titulo}`}
-                  allow="encrypted-media; picture-in-picture"
+                  allow="autoplay; encrypted-media; picture-in-picture"
                   allowFullScreen
                   className="absolute inset-0 h-full w-full border-0"
                 />
