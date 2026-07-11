@@ -21,6 +21,7 @@ export interface PeliculaResumen {
   fechaEstreno: string | null;
   duracionMin: number | null;
   posterUrl: string | null;
+  votoPromedio: number | null;
   generos: string[];
 }
 
@@ -110,6 +111,7 @@ export interface PeliculaDetalle {
   aspectRatio: string | null;
   posterUrl: string | null;
   backdropUrl: string | null;
+  votoPromedio: number | null;
   generos: { id: string; nombre: string }[];
   directores: PersonaResumen[];
   cast: (PersonaResumen & { personaje: string | null })[];

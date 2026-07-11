@@ -4,14 +4,23 @@ export const idParamsSchema = z.object({
   id: z.string().uuid('id inválido'),
 });
 
-/** Cómo ordenar el listado. Resuelve las cuatro combinaciones de la UI + alfabético. */
+/** Cómo ordenar el listado. Resuelve las combinaciones de la UI + alfabético. */
 export const ORDENES_LISTADO = [
   'estreno_desc', // más nuevo primero (default)
   'estreno_asc', // más antiguo primero
+  'valoracion_desc', // mejor valoradas primero
+  'valoracion_asc', // peor valoradas primero
   'duracion_desc', // más largo primero
   'duracion_asc', // más corto primero
   'titulo_asc', // A–Z
 ] as const;
+
+/**
+ * Votos mínimos de TMDB para entrar en el orden por valoración: sin un piso, una
+ * película con un puñado de votos y un 10 perfecto encabezaría sobre los clásicos.
+ * Solo aplica cuando se ordena por valoración.
+ */
+export const MIN_VOTOS_RANKING = 50;
 
 export const FRANJAS_DURACION = ['corta', 'media', 'larga'] as const;
 

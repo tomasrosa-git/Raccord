@@ -75,6 +75,8 @@ async function guardarPelicula(detalle: TmdbPeliculaDetalle) {
       posterUrl: detalle.poster_path ? tmdbImageUrl.poster(detalle.poster_path) : null,
       backdropUrl: detalle.backdrop_path ? tmdbImageUrl.backdrop(detalle.backdrop_path) : null,
       popularity: detalle.popularity ?? null,
+      votoPromedio: detalle.vote_count > 0 ? detalle.vote_average : null,
+      votoConteo: detalle.vote_count ?? null,
     },
     create: {
       tmdbId: detalle.id,
@@ -86,6 +88,8 @@ async function guardarPelicula(detalle: TmdbPeliculaDetalle) {
       posterUrl: detalle.poster_path ? tmdbImageUrl.poster(detalle.poster_path) : null,
       backdropUrl: detalle.backdrop_path ? tmdbImageUrl.backdrop(detalle.backdrop_path) : null,
       popularity: detalle.popularity ?? null,
+      votoPromedio: detalle.vote_count > 0 ? detalle.vote_average : null,
+      votoConteo: detalle.vote_count ?? null,
     },
   });
 

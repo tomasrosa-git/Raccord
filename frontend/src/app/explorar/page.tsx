@@ -15,6 +15,8 @@ const DURACIONES = [
 const ORDENES = [
   { valor: 'estreno_desc', label: 'Estreno · más nuevo' },
   { valor: 'estreno_asc', label: 'Estreno · más antiguo' },
+  { valor: 'valoracion_desc', label: 'Valoración · mayor a menor' },
+  { valor: 'valoracion_asc', label: 'Valoración · menor a mayor' },
   { valor: 'duracion_desc', label: 'Duración · más larga' },
   { valor: 'duracion_asc', label: 'Duración · más corta' },
   { valor: 'titulo_asc', label: 'Título · A–Z' },

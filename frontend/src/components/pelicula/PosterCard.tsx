@@ -19,10 +19,12 @@ export function PosterCard({
     titulo: string;
     fechaEstreno: string | null;
     posterUrl: string | null;
+    votoPromedio?: number | null;
   };
   prioridad?: boolean;
 }) {
   const anio = anioDe(pelicula.fechaEstreno);
+  const nota = pelicula.votoPromedio != null ? pelicula.votoPromedio.toFixed(1) : null;
   return (
     <Link href={`/pelicula/${pelicula.id}`} className="group block">
       <div className="relative aspect-2/3 overflow-hidden bg-carbon">
@@ -44,7 +46,12 @@ export function PosterCard({
       <p className="mt-2 line-clamp-2 text-sm leading-snug text-papel/90 group-hover:text-papel">
         {pelicula.titulo}
       </p>
-      {anio && <p className="font-mono text-xs text-papel/40">{anio}</p>}
+      {(anio || nota) && (
+        <p className="mt-0.5 flex items-center gap-2 font-mono text-xs text-papel/40">
+          {anio && <span>{anio}</span>}
+          {nota && <span className="text-marca-cambio/80">★ {nota}</span>}
+        </p>
+      )}
     </Link>
   );
 }

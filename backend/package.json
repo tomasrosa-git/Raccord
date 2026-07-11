@@ -15,7 +15,8 @@
     "seed": "tsx prisma/seed.ts",
     "seed:premios": "tsx prisma/seed-premios.ts",
     "paletas": "tsx src/jobs/extraerPaletas.job.ts",
-    "popularidad": "tsx src/jobs/backfillPopularidad.job.ts"
+    "popularidad": "tsx src/jobs/backfillPopularidad.job.ts",
+    "valoracion": "tsx src/jobs/backfillValoracion.job.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

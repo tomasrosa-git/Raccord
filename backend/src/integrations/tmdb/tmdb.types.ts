@@ -56,6 +56,8 @@ export interface TmdbPeliculaDetalle {
   poster_path: string | null;
   backdrop_path: string | null;
   popularity: number;
+  vote_average: number; // nota media de TMDB, 0–10
+  vote_count: number;
   genres: TmdbGenero[];
   credits?: TmdbCreditos;
 }
