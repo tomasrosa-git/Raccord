@@ -201,3 +201,33 @@ export interface EtapaCarrera {
   anioInicio: number;
   anioFin: number | null;
 }
+
+// --- Novedades de la home (cartelera, próximos, tendencias, tráilers) ---
+
+export interface NovedadPelicula {
+  tmdbId: number;
+  titulo: string;
+  posterUrl: string | null;
+  backdropUrl: string | null;
+  fechaEstreno: string | null;
+  votoPromedio: number | null;
+  /** Si la película está en el catálogo, el id para enlazar a su ficha. */
+  peliculaId: string | null;
+}
+
+export interface TrailerNovedad {
+  tmdbId: number;
+  titulo: string;
+  youtubeKey: string;
+  publicadoEn: string;
+  backdropUrl: string | null;
+  fechaEstreno: string | null;
+  peliculaId: string | null;
+}
+
+export interface Novedades {
+  cartelera: NovedadPelicula[];
+  proximos: NovedadPelicula[];
+  tendencias: NovedadPelicula[];
+  trailers: TrailerNovedad[];
+}

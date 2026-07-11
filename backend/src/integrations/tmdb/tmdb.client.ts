@@ -6,6 +6,8 @@ import type {
   TmdbPeliculaDetalle,
   TmdbCreditosDePersona,
   TmdbImagenesPelicula,
+  TmdbListadoPeliculas,
+  TmdbVideosPelicula,
 } from './tmdb.types';
 
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -15,6 +17,9 @@ const IMAGE_BASE = 'https://image.tmdb.org/t/p';
 // traducción, en ese caso se hace fallback a en-US campo por campo.
 const IDIOMA = 'es-AR';
 const IDIOMA_FALLBACK = 'en-US';
+
+// Región para fechas de estreno y cartelera (now_playing / upcoming).
+const REGION = 'AR';
 
 export const tmdbImageUrl = {
   poster: (path: string) => `${IMAGE_BASE}/w500${path}`,
@@ -94,6 +99,37 @@ class TmdbClient {
   /** Detalle liviano (sin créditos ni fallback de idioma) — para backfills puntuales. */
   getPeliculaBasica(tmdbId: number): Promise<TmdbPeliculaDetalle> {
     return this.get(`/movie/${tmdbId}`, { language: IDIOMA });
+  }
+
+  /** Películas en salas de Argentina esta semana. */
+  getEnCartelera(): Promise<TmdbListadoPeliculas> {
+    return this.get('/movie/now_playing', { language: IDIOMA, region: REGION });
+  }
+
+  /**
+   * Próximos estrenos por ventana de fechas (global, orden por popularidad).
+   * `/movie/upcoming` con región AR devuelve 3-4 títulos: discover rinde más.
+   */
+  descubrirProximos(desde: string, hasta: string): Promise<TmdbListadoPeliculas> {
+    return this.get('/discover/movie', {
+      language: IDIOMA,
+      sort_by: 'popularity.desc',
+      'primary_release_date.gte': desde,
+      'primary_release_date.lte': hasta,
+    });
+  }
+
+  /** Lo más visto de la semana según TMDB (global, no por región). */
+  getTendenciasSemana(): Promise<TmdbListadoPeliculas> {
+    return this.get('/trending/movie/week', { language: IDIOMA });
+  }
+
+  /** Videos de una película. `include_video_language` suma los tráilers en inglés. */
+  getVideosPelicula(tmdbId: number): Promise<TmdbVideosPelicula> {
+    return this.get(`/movie/${tmdbId}/videos`, {
+      language: IDIOMA,
+      include_video_language: 'es,en',
+    });
   }
 }
 

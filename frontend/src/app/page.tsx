@@ -1,22 +1,29 @@
 import Link from 'next/link';
 import { EtiquetaSeccion } from '@/components/ui/EtiquetaSeccion';
 import { Chip } from '@/components/ui/Chip';
+import { SalaTrailers } from '@/components/inicio/SalaTrailers';
+import { NovedadesTabs } from '@/components/inicio/NovedadesTabs';
 import { getStats } from '@/lib/api/stats';
+import { getNovedades } from '@/lib/api/novedades';
 
-export const revalidate = 3600;
+// Media hora, el mismo pulso que las novedades del backend.
+export const revalidate = 1800;
 
 // Los 4 con curaduría en profundidad; el resto se cuenta contra las stats.
 const CURADOS = ['Wes Anderson', 'Pedro Almodóvar', 'Lucrecia Martel', 'Bong Joon-ho'];
 
 export default async function Home() {
-  const stats = await getStats().catch(() => null);
+  const [stats, novedades] = await Promise.all([
+    getStats().catch(() => null),
+    getNovedades().catch(() => null),
+  ]);
 
   return (
     <div className="flex flex-1 flex-col">
       {/* Barra de letterbox superior: guiño al encuadre de proyección. */}
       <div aria-hidden className="h-10 bg-black sm:h-14" />
 
-      <section className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center px-4 py-16 sm:px-6 sm:py-24">
+      <section className="mx-auto flex w-full max-w-6xl flex-col justify-center px-4 py-16 sm:px-6 sm:py-24">
         <EtiquetaSeccion>Cine de autor</EtiquetaSeccion>
 
         <h1 className="mt-6 max-w-3xl font-display text-4xl leading-tight sm:text-6xl">
@@ -56,6 +63,17 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {/* La sala: el letterbox se vuelve pantalla — tráilers en tiempo real. */}
+      {novedades && <SalaTrailers trailers={novedades.trailers} />}
+
+      {novedades && (
+        <NovedadesTabs
+          cartelera={novedades.cartelera}
+          proximos={novedades.proximos}
+          tendencias={novedades.tendencias}
+        />
+      )}
 
       {/* Barra de letterbox inferior. */}
       <div aria-hidden className="h-10 bg-black sm:h-14" />

@@ -83,3 +83,34 @@ export interface TmdbImagenesPelicula {
   backdrops: TmdbImagen[];
   posters: TmdbImagen[];
 }
+
+// --- Novedades (cartelera, próximos, tendencias, tráilers) ---
+
+export interface TmdbPeliculaListado {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  release_date: string; // puede venir vacía
+  popularity: number;
+  vote_average: number;
+  vote_count: number;
+}
+
+export interface TmdbListadoPeliculas {
+  results: TmdbPeliculaListado[];
+}
+
+export interface TmdbVideo {
+  key: string;
+  name: string;
+  site: string; // "YouTube", "Vimeo", …
+  type: string; // "Trailer", "Teaser", …
+  official: boolean;
+  published_at: string;
+  iso_639_1: string;
+}
+
+export interface TmdbVideosPelicula {
+  results: TmdbVideo[];
+}
