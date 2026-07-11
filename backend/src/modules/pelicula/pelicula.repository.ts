@@ -1,13 +1,13 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma';
-import type { ListarPeliculasQuery } from './pelicula.schema';
+import { UMBRALES_DURACION, type ListarPeliculasQuery, type OrdenListado } from './pelicula.schema';
 
 function filtrosDeListado(query: ListarPeliculasQuery): Prisma.PeliculaWhereInput {
   return {
-    ...(query.anio && {
+    ...(query.decada && {
       fechaEstreno: {
-        gte: new Date(`${query.anio}-01-01T00:00:00Z`),
-        lt: new Date(`${query.anio + 1}-01-01T00:00:00Z`),
+        gte: new Date(`${query.decada}-01-01T00:00:00Z`),
+        lt: new Date(`${query.decada + 10}-01-01T00:00:00Z`),
       },
     }),
     ...(query.genero && {
@@ -15,7 +15,25 @@ function filtrosDeListado(query: ListarPeliculasQuery): Prisma.PeliculaWhereInpu
         some: { genero: { nombre: { equals: query.genero, mode: 'insensitive' as const } } },
       },
     }),
+    ...(query.duracion && { duracionMin: UMBRALES_DURACION[query.duracion] }),
   };
+}
+
+/** Traduce el orden de la UI a un orderBy de Prisma; los nulos van siempre al final. */
+function ordenDeListado(orden: OrdenListado): Prisma.PeliculaOrderByWithRelationInput {
+  switch (orden) {
+    case 'estreno_asc':
+      return { fechaEstreno: { sort: 'asc', nulls: 'last' } };
+    case 'duracion_desc':
+      return { duracionMin: { sort: 'desc', nulls: 'last' } };
+    case 'duracion_asc':
+      return { duracionMin: { sort: 'asc', nulls: 'last' } };
+    case 'titulo_asc':
+      return { titulo: 'asc' };
+    case 'estreno_desc':
+    default:
+      return { fechaEstreno: { sort: 'desc', nulls: 'last' } };
+  }
 }
 
 const resumenSelect = {
@@ -34,13 +52,37 @@ export const peliculaRepository = {
       prisma.pelicula.findMany({
         where,
         select: resumenSelect,
-        orderBy: { fechaEstreno: { sort: 'desc', nulls: 'last' } },
+        orderBy: ordenDeListado(query.orden),
         skip: (query.pagina - 1) * query.limite,
         take: query.limite,
       }),
       prisma.pelicula.count({ where }),
     ]);
     return { items, total };
+  },
+
+  /**
+   * Insumo de los filtros de /explorar: géneros existentes (con conteo, para
+   * ordenarlos por relevancia) y el rango de años del catálogo (para derivar
+   * las décadas disponibles). Solo cuenta películas con estreno conocido.
+   */
+  async facetas() {
+    const [generos, rango] = await Promise.all([
+      prisma.genero.findMany({
+        select: { nombre: true, _count: { select: { peliculas: true } } },
+        orderBy: { peliculas: { _count: 'desc' } },
+      }),
+      prisma.pelicula.aggregate({
+        where: { fechaEstreno: { not: null } },
+        _min: { fechaEstreno: true },
+        _max: { fechaEstreno: true },
+      }),
+    ]);
+    return {
+      generos: generos.filter((g) => g._count.peliculas > 0).map((g) => g.nombre),
+      anioMin: rango._min.fechaEstreno?.getFullYear() ?? null,
+      anioMax: rango._max.fechaEstreno?.getFullYear() ?? null,
+    };
   },
 
   /** Películas con fecha y popularidad conocidas — insumo de "por década". */
