@@ -57,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${piazzolla.variable} ${workSans.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${piazzolla.variable} ${workSans.variable} ${plexMono.variable} h-full scroll-smooth antialiased`}
     >
       <body className="flex min-h-dvh flex-col">
         <AuthProvider>

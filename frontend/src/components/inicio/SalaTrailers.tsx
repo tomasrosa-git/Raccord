@@ -12,8 +12,8 @@ import type { TrailerNovedad } from '@/types';
  * La sala: los últimos tráilers proyectados dentro del letterbox de la home.
  * La pantalla arranca apagada (solo el fotograma y el botón de play): el
  * iframe de YouTube recién se carga al primer play, para no traer scripts de
- * terceros a quien no va a reproducir nada. Con la función ya encendida,
- * cambiar de tráiler sigue reproduciendo.
+ * terceros a quien no va a reproducir nada. Nada se reproduce solo: encender
+ * la sala o cambiar de tráiler deja el player de YouTube en pausa.
  */
 export function SalaTrailers({ trailers }: { trailers: TrailerNovedad[] }) {
   const [sel, setSel] = useState(0);
@@ -23,7 +23,7 @@ export function SalaTrailers({ trailers }: { trailers: TrailerNovedad[] }) {
   const actual = trailers[sel];
 
   return (
-    <section className="bg-black py-12 sm:py-16">
+    <section id="la-sala" className="scroll-mt-4 border-t border-borde bg-black py-12 sm:py-16">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -44,9 +44,9 @@ export function SalaTrailers({ trailers }: { trailers: TrailerNovedad[] }) {
               {encendida ? (
                 <iframe
                   key={actual.youtubeKey}
-                  src={`https://www.youtube-nocookie.com/embed/${actual.youtubeKey}?autoplay=1&rel=0`}
+                  src={`https://www.youtube-nocookie.com/embed/${actual.youtubeKey}?rel=0`}
                   title={`Tráiler de ${actual.titulo}`}
-                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allow="encrypted-media; picture-in-picture"
                   allowFullScreen
                   className="absolute inset-0 h-full w-full border-0"
                 />
