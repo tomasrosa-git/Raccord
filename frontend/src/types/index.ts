@@ -37,6 +37,12 @@ export interface DecadaPeliculas {
   peliculas: PeliculaResumen[];
 }
 
+export interface FacetasPeliculas {
+  generos: string[];
+  anioMin: number | null;
+  anioMax: number | null;
+}
+
 export interface FrameGuessHoy {
   fecha: string; // "YYYY-MM-DD" en hora de Argentina
   backdropUrl: string;

@@ -22,6 +22,13 @@ export const peliculaService = {
     };
   },
 
+  /** Opciones de los filtros de /explorar. Cacheado: cambia solo al ampliar el catálogo. */
+  obtenerFacetas() {
+    return conCache('peliculas:facetas', CACHE_TTL_SEGUNDOS.decadas, () =>
+      peliculaRepository.facetas()
+    );
+  },
+
   async obtenerDetalle(id: string) {
     const pelicula = await peliculaRepository.buscarDetallePorId(id);
     if (!pelicula) throw AppError.notFound('Película no encontrada');
