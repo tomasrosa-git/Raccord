@@ -17,6 +17,10 @@ const envSchema = z.object({
 
   // Requerida a partir de la integración con TMDB (Fase 3)
   TMDB_API_KEY: z.string().optional(),
+
+  // OAuth Client ID de Google. Se usa como `audience` al verificar el ID token.
+  // Opcional: sin él, el endpoint /api/auth/google queda deshabilitado.
+  GOOGLE_CLIENT_ID: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

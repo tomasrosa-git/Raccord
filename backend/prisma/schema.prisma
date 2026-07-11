@@ -164,7 +164,10 @@ model Usuario {
   id           String   @id @default(uuid())
   email        String   @unique
   username     String   @unique
-  passwordHash String
+  // Opcional: las cuentas creadas con Google no tienen contraseña propia.
+  passwordHash String?
+  // Identificador de Google (claim `sub` del ID token). Único cuando existe.
+  googleId     String?  @unique
   avatarUrl    String?
   bio          String?
   rol          Rol      @default(USUARIO)

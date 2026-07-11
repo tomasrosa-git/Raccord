@@ -3,9 +3,11 @@
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useCallback } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { Input } from '@/components/ui/Input';
 import { Boton } from '@/components/ui/Boton';
+import { BotonGoogle, googleHabilitado } from '@/components/auth/BotonGoogle';
 
 export default function PaginaLogin() {
   const { login } = useAuth();
@@ -14,6 +16,7 @@ export default function PaginaLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const onGoogleError = useCallback((msg: string) => setError(msg), []);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -61,6 +64,16 @@ export default function PaginaLogin() {
           {enviando ? 'Ingresando…' : 'Ingresar'}
         </Boton>
       </form>
+      {googleHabilitado && (
+        <>
+          <div className="my-6 flex items-center gap-4">
+            <span className="h-px flex-1 bg-borde" />
+            <span className="font-mono text-xs uppercase tracking-wider text-papel/40">o</span>
+            <span className="h-px flex-1 bg-borde" />
+          </div>
+          <BotonGoogle texto="signin_with" onError={onGoogleError} />
+        </>
+      )}
       <p className="mt-6 text-sm text-papel/60">
         ¿No tenés cuenta?{' '}
         <Link href="/registro" className="text-papel underline-offset-4 hover:underline">

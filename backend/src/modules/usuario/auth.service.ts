@@ -8,9 +8,34 @@ import {
   hashearRefreshToken,
   calcularExpiracionRefreshToken,
 } from './token.utils';
+import { verificarTokenGoogle } from './google.utils';
 import type { RegistroInput, LoginInput } from './usuario.schema';
 
 const SALT_ROUNDS = 12;
+
+/**
+ * Deriva un username válido y libre a partir del email o el nombre de Google.
+ * Sanea a `[a-z0-9_]`, respeta el largo del schema (3–30) y desambigua con un
+ * sufijo numérico si la base ya está tomada.
+ */
+async function generarUsernameUnico(base: string): Promise<string> {
+  let raiz = base
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // saca acentos
+    .replace(/[^a-z0-9_]/g, '')
+    .slice(0, 30);
+  if (raiz.length < 3) raiz = `user${raiz}`;
+  raiz = raiz.slice(0, 24); // deja lugar para el sufijo
+
+  let candidato = raiz;
+  let intento = 0;
+  while (await usuarioRepository.buscarPorUsername(candidato)) {
+    intento += 1;
+    candidato = `${raiz}${intento}`;
+  }
+  return candidato;
+}
 
 interface SesionEmitida {
   usuario: {
@@ -67,9 +92,49 @@ export const authService = {
     const usuario = await usuarioRepository.buscarPorEmail(input.email);
     if (!usuario) throw AppError.unauthorized('Email o contraseña incorrectos');
 
+    // Cuenta creada solo con Google: no tiene contraseña propia.
+    if (!usuario.passwordHash) {
+      throw AppError.unauthorized('Esta cuenta se creó con Google. Ingresá con Google.');
+    }
+
     const passwordValida = await bcrypt.compare(input.password, usuario.passwordHash);
     if (!passwordValida) throw AppError.unauthorized('Email o contraseña incorrectos');
 
+    return emitirSesion(usuario);
+  },
+
+  async loginConGoogle(credential: string) {
+    const perfil = await verificarTokenGoogle(credential);
+
+    // 1) Ya existe una cuenta vinculada a este Google: se usa directamente.
+    const porGoogle = await usuarioRepository.buscarPorGoogleId(perfil.googleId);
+    if (porGoogle) return emitirSesion(porGoogle);
+
+    // 2) Existe una cuenta con ese email (registro por contraseña): se vincula.
+    //    Solo si Google confirma que el email está verificado, para no dejar
+    //    que un tercero se apropie de una cuenta ajena vía un email no probado.
+    const porEmail = await usuarioRepository.buscarPorEmail(perfil.email);
+    if (porEmail) {
+      if (!perfil.emailVerificado) {
+        throw AppError.conflict('Ya existe una cuenta con ese email. Ingresá con tu contraseña.');
+      }
+      const vinculado = await usuarioRepository.vincularGoogle(
+        porEmail.id,
+        perfil.googleId,
+        porEmail.avatarUrl ? undefined : perfil.avatarUrl
+      );
+      return emitirSesion(vinculado);
+    }
+
+    // 3) Usuario nuevo: se crea sin contraseña, con un username derivado.
+    const base = perfil.nombre || perfil.email.split('@')[0] || 'user';
+    const username = await generarUsernameUnico(base);
+    const usuario = await usuarioRepository.crearConGoogle({
+      email: perfil.email,
+      username,
+      googleId: perfil.googleId,
+      avatarUrl: perfil.avatarUrl,
+    });
     return emitirSesion(usuario);
   },
 

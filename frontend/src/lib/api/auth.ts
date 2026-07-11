@@ -49,6 +49,10 @@ export async function registroApi(
   return leerSesion(await postAuth('/registro', { email, username, password }));
 }
 
+export async function googleApi(credential: string): Promise<Sesion> {
+  return leerSesion(await postAuth('/google', { credential }));
+}
+
 /** Devuelve null si no hay cookie de sesión válida. */
 export async function refreshApi(): Promise<Sesion | null> {
   const res = await postAuth('/refresh');
