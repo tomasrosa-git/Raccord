@@ -1,10 +1,20 @@
+import Link from 'next/link';
+
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-borde">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6">
-        <p className="font-mono text-xs text-papel/40">
-          Raccord — cine de autor, del lado del director.
-        </p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <p className="font-mono text-xs text-papel/40">
+            Raccord — cine de autor, del lado del director.
+          </p>
+          <Link
+            href="/privacidad"
+            className="font-mono text-xs text-papel/40 underline-offset-4 hover:text-papel/70 hover:underline"
+          >
+            Política de privacidad
+          </Link>
+        </div>
         {/* Atribución obligatoria por los términos de uso de TMDB. */}
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}

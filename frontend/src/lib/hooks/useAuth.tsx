@@ -12,6 +12,7 @@ import {
 import {
   loginApi,
   registroApi,
+  googleApi,
   refreshApi,
   logoutApi,
   type Usuario,
@@ -29,6 +30,7 @@ interface AuthContextValue {
   cargando: boolean;
   login: (email: string, password: string) => Promise<void>;
   registro: (email: string, username: string, password: string) => Promise<void>;
+  loginGoogle: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
   /** fetch a la API con Authorization; reintenta una vez tras refresh si da 401. */
   fetchAuth: (path: string, init?: RequestInit) => Promise<Response>;
@@ -83,6 +85,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [aplicarSesion]
   );
 
+  const loginGoogle = useCallback(
+    async (credential: string) => {
+      aplicarSesion(await googleApi(credential));
+    },
+    [aplicarSesion]
+  );
+
   const logout = useCallback(async () => {
     await logoutApi();
     aplicarSesion(null);
@@ -111,7 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <AuthContext.Provider value={{ usuario, cargando, login, registro, logout, fetchAuth }}>
+    <AuthContext.Provider
+      value={{ usuario, cargando, login, registro, loginGoogle, logout, fetchAuth }}
+    >
       {children}
     </AuthContext.Provider>
   );
