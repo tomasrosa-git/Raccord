@@ -57,6 +57,8 @@ model Pelicula {
   posterUrl      String?
   backdropUrl    String?
   popularity     Float? // popularidad de TMDB (criterio de "lo más importante por década")
+  votoPromedio   Float? // nota media de TMDB, 0–10 (se actualiza en cada sync)
+  votoConteo     Int? // cantidad de votos que respaldan la nota (piso para el ranking)
   createdAt      DateTime  @default(now())
 
   generos   PeliculaGenero[]

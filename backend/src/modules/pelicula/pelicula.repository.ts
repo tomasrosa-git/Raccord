@@ -1,6 +1,14 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma';
-import { UMBRALES_DURACION, type ListarPeliculasQuery, type OrdenListado } from './pelicula.schema';
+import {
+  UMBRALES_DURACION,
+  MIN_VOTOS_RANKING,
+  type ListarPeliculasQuery,
+  type OrdenListado,
+} from './pelicula.schema';
+
+const esOrdenPorValoracion = (orden: OrdenListado) =>
+  orden === 'valoracion_desc' || orden === 'valoracion_asc';
 
 function filtrosDeListado(query: ListarPeliculasQuery): Prisma.PeliculaWhereInput {
   return {
@@ -16,6 +24,8 @@ function filtrosDeListado(query: ListarPeliculasQuery): Prisma.PeliculaWhereInpu
       },
     }),
     ...(query.duracion && { duracionMin: UMBRALES_DURACION[query.duracion] }),
+    // Ordenar por valoración solo tiene sentido sobre películas con votos suficientes.
+    ...(esOrdenPorValoracion(query.orden) && { votoConteo: { gte: MIN_VOTOS_RANKING } }),
   };
 }
 
@@ -24,6 +34,10 @@ function ordenDeListado(orden: OrdenListado): Prisma.PeliculaOrderByWithRelation
   switch (orden) {
     case 'estreno_asc':
       return { fechaEstreno: { sort: 'asc', nulls: 'last' } };
+    case 'valoracion_desc':
+      return { votoPromedio: { sort: 'desc', nulls: 'last' } };
+    case 'valoracion_asc':
+      return { votoPromedio: { sort: 'asc', nulls: 'last' } };
     case 'duracion_desc':
       return { duracionMin: { sort: 'desc', nulls: 'last' } };
     case 'duracion_asc':
@@ -42,6 +56,7 @@ const resumenSelect = {
   fechaEstreno: true,
   duracionMin: true,
   posterUrl: true,
+  votoPromedio: true,
   generos: { select: { genero: { select: { nombre: true } } } },
 } satisfies Prisma.PeliculaSelect;
 

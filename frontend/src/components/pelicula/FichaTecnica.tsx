@@ -53,6 +53,12 @@ export function FichaTecnica({ pelicula }: { pelicula: PeliculaDetalle }) {
         <Fila etiqueta="Duración">{formatearDuracion(pelicula.duracionMin)}</Fila>
       )}
       {pelicula.aspectRatio && <Fila etiqueta="Formato">{pelicula.aspectRatio}</Fila>}
+      {pelicula.votoPromedio != null && (
+        <Fila etiqueta="Valoración">
+          <span className="text-marca-cambio">★</span> {pelicula.votoPromedio.toFixed(1)}
+          <span className="text-papel/40"> / 10 · TMDB</span>
+        </Fila>
+      )}
       {pelicula.tituloOriginal && pelicula.tituloOriginal !== pelicula.titulo && (
         <Fila etiqueta="Título original">{pelicula.tituloOriginal}</Fila>
       )}
