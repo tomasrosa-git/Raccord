@@ -18,6 +18,7 @@ import { busquedaRouter } from './modules/busqueda/busqueda.routes';
 import { statsRouter } from './modules/stats/stats.routes';
 import { premioRouter } from './modules/premios/premios.routes';
 import { juegosRouter } from './modules/juegos/juegos.routes';
+import { novedadesRouter } from './modules/novedades/novedades.routes';
 import { requireAuth } from './middlewares/auth.middleware';
 import { apiRateLimiter } from './middlewares/rateLimiter';
 
@@ -61,6 +62,7 @@ app.use('/api/watchlist', watchlistRouter);
 app.use('/api/likes', likesRouter);
 app.use('/api/premios', premioRouter);
 app.use('/api/juegos', juegosRouter);
+app.use('/api/novedades', novedadesRouter);
 
 app.use((req, _res, next) => {
   next(AppError.notFound(`Ruta no encontrada: ${req.method} ${req.path}`));

@@ -1,22 +1,29 @@
 import Link from 'next/link';
 import { EtiquetaSeccion } from '@/components/ui/EtiquetaSeccion';
 import { Chip } from '@/components/ui/Chip';
+import { SalaTrailers } from '@/components/inicio/SalaTrailers';
+import { NovedadesTabs } from '@/components/inicio/NovedadesTabs';
 import { getStats } from '@/lib/api/stats';
+import { getNovedades } from '@/lib/api/novedades';
 
-export const revalidate = 3600;
+// Media hora, el mismo pulso que las novedades del backend.
+export const revalidate = 1800;
 
 // Los 4 con curaduría en profundidad; el resto se cuenta contra las stats.
 const CURADOS = ['Wes Anderson', 'Pedro Almodóvar', 'Lucrecia Martel', 'Bong Joon-ho'];
 
 export default async function Home() {
-  const stats = await getStats().catch(() => null);
+  const [stats, novedades] = await Promise.all([
+    getStats().catch(() => null),
+    getNovedades().catch(() => null),
+  ]);
 
   return (
     <div className="flex flex-1 flex-col">
       {/* Barra de letterbox superior: guiño al encuadre de proyección. */}
       <div aria-hidden className="h-10 bg-black sm:h-14" />
 
-      <section className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center px-4 py-16 sm:px-6 sm:py-24">
+      <section className="mx-auto flex w-full max-w-6xl flex-col justify-center px-4 py-14 sm:px-6 sm:py-20">
         <EtiquetaSeccion>Cine de autor</EtiquetaSeccion>
 
         <h1 className="mt-6 max-w-3xl font-display text-4xl leading-tight sm:text-6xl">
@@ -43,7 +50,7 @@ export default async function Home() {
           )}
         </div>
 
-        <div className="mt-16 flex flex-wrap gap-2">
+        <div className="mt-12 flex flex-wrap gap-2">
           {CURADOS.map((nombre) => (
             <Chip key={nombre}>{nombre}</Chip>
           ))}
@@ -55,7 +62,36 @@ export default async function Home() {
             </Link>
           )}
         </div>
+
+        {/* Puente con la sala: sin esto, el corte a negro parece el final de la página. */}
+        {novedades && novedades.trailers.length > 0 && (
+          <a
+            href="#la-sala"
+            className="group mt-12 inline-flex items-center gap-3 self-start font-mono text-xs text-papel/50 transition-colors hover:text-marca-cambio"
+          >
+            <span aria-hidden className="animate-bounce text-marca-cambio">
+              ↓
+            </span>
+            <span>
+              Ahora en la sala:{' '}
+              <span className="text-papel/80 group-hover:text-marca-cambio">
+                el tráiler de {novedades.trailers[0].titulo}
+              </span>
+            </span>
+          </a>
+        )}
       </section>
+
+      {/* La sala: el letterbox se vuelve pantalla — tráilers en tiempo real. */}
+      {novedades && <SalaTrailers trailers={novedades.trailers} />}
+
+      {novedades && (
+        <NovedadesTabs
+          cartelera={novedades.cartelera}
+          proximos={novedades.proximos}
+          tendencias={novedades.tendencias}
+        />
+      )}
 
       {/* Barra de letterbox inferior. */}
       <div aria-hidden className="h-10 bg-black sm:h-14" />
