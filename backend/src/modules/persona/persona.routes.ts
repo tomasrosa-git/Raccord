@@ -8,6 +8,7 @@ import {
   etapasCarrera,
   seguir,
   dejarDeSeguir,
+  miEstadoPersona,
 } from './persona.controller';
 
 export const personaRouter = Router();
@@ -18,5 +19,6 @@ personaRouter.get('/:id', detalle);
 personaRouter.get('/:id/filmografia', filmografia);
 personaRouter.get('/:id/premios', premios);
 personaRouter.get('/:id/etapas-carrera', etapasCarrera);
+personaRouter.get('/:id/mi-estado', requireAuth, miEstadoPersona);
 personaRouter.post('/:id/seguir', requireAuth, seguir);
 personaRouter.delete('/:id/seguir', requireAuth, dejarDeSeguir);

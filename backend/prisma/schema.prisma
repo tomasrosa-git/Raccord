@@ -41,6 +41,8 @@ model Persona {
   premios       PremioGanado[]
   estilos       PersonaEstiloTag[]
   seguidores    SeguidorPersona[]
+  reviews       ReviewPersona[]
+  enPanteones   DirectorFavorito[]
 
   @@index([nombre])
 }
@@ -61,13 +63,14 @@ model Pelicula {
   votoConteo     Int? // cantidad de votos que respaldan la nota (piso para el ranking)
   createdAt      DateTime  @default(now())
 
-  generos   PeliculaGenero[]
-  creditos  CreditoPelicula[]
-  paleta    ColorPaleta[]
-  premios   PremioGanado[]
-  reviews   Review[]
-  watchlist WatchlistItem[]
-  likes     Like[]
+  generos    PeliculaGenero[]
+  creditos   CreditoPelicula[]
+  paleta     ColorPaleta[]
+  premios    PremioGanado[]
+  reviews    Review[]
+  watchlist  WatchlistItem[]
+  likes      Like[]
+  favoritaEn DirectorFavorito[]
 
   @@index([titulo])
 }
@@ -173,11 +176,13 @@ model Usuario {
   rol          Rol      @default(USUARIO)
   createdAt    DateTime @default(now())
 
-  reviews       Review[]
-  watchlist     WatchlistItem[]
-  likes         Like[]
-  siguiendo     SeguidorPersona[]
-  refreshTokens RefreshToken[]
+  reviews        Review[]
+  reviewsPersona ReviewPersona[]
+  watchlist      WatchlistItem[]
+  likes          Like[]
+  siguiendo      SeguidorPersona[]
+  panteon        DirectorFavorito[]
+  refreshTokens  RefreshToken[]
 }
 
 model RefreshToken {
@@ -194,18 +199,56 @@ model RefreshToken {
 }
 
 model Review {
-  id              String   @id @default(uuid())
-  usuarioId       String
-  peliculaId      String
-  texto           String
+  id        String @id @default(uuid())
+  usuarioId String
+  peliculaId String
+  texto     String
+  // Puntuación en medias estrellas: 1..10 (1 = ½★, 10 = 5★). Guardarla como
+  // Int en esta escala evita comparaciones de floats en el ranking.
   puntuacion      Int
   contieneSpoiler Boolean  @default(false)
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
 
   usuario  Usuario  @relation(fields: [usuarioId], references: [id])
   pelicula Pelicula @relation(fields: [peliculaId], references: [id])
 
   @@unique([usuarioId, peliculaId])
+}
+
+// Reseña de la obra de un director/cineasta, simétrica a Review (película).
+model ReviewPersona {
+  id              String   @id @default(uuid())
+  usuarioId       String
+  personaId       String
+  texto           String
+  puntuacion      Int // medias estrellas: 1..10 (ver Review.puntuacion)
+  contieneSpoiler Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id])
+
+  @@unique([usuarioId, personaId])
+}
+
+// Panteón: los directores favoritos de un usuario, ordenados, con la película
+// favorita de cada uno (opcional). Es el centro del perfil público.
+model DirectorFavorito {
+  id                 String   @id @default(uuid())
+  usuarioId          String
+  personaId          String
+  peliculaFavoritaId String?
+  orden              Int
+  createdAt          DateTime @default(now())
+
+  usuario  Usuario   @relation(fields: [usuarioId], references: [id])
+  persona  Persona   @relation(fields: [personaId], references: [id])
+  pelicula Pelicula? @relation(fields: [peliculaFavoritaId], references: [id])
+
+  @@unique([usuarioId, personaId])
+  @@index([usuarioId, orden])
 }
 
 model WatchlistItem {

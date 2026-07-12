@@ -13,6 +13,11 @@ import { personaRouter } from './modules/persona/persona.routes';
 import { colaboradoresRouter } from './modules/colaboradores/colaboradores.routes';
 import { paletaRouter } from './modules/paleta/paleta.routes';
 import { peliculaReviewsRouter, reviewRouter } from './modules/review/review.routes';
+import {
+  personaReviewsRouter,
+  reviewPersonaRouter,
+} from './modules/reviewPersona/reviewPersona.routes';
+import { panteonRouter } from './modules/panteon/panteon.routes';
 import { watchlistRouter, likesRouter, miEstadoPelicula } from './modules/watchlist/watchlist.routes';
 import { busquedaRouter } from './modules/busqueda/busqueda.routes';
 import { statsRouter } from './modules/stats/stats.routes';
@@ -56,8 +61,11 @@ app.get('/api/peliculas/:peliculaId/mi-estado', requireAuth, miEstadoPelicula);
 app.use('/api/peliculas', peliculaRouter);
 app.use('/api/personas', colaboradoresRouter);
 app.use('/api/personas', paletaRouter);
+app.use('/api/personas', personaReviewsRouter);
 app.use('/api/personas', personaRouter);
 app.use('/api/reviews', reviewRouter);
+app.use('/api/reviews-persona', reviewPersonaRouter);
+app.use('/api/panteon', panteonRouter);
 app.use('/api/watchlist', watchlistRouter);
 app.use('/api/likes', likesRouter);
 app.use('/api/premios', premioRouter);

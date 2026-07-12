@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
+// Puntuación en medias estrellas: 1..10 (1 = ½★, 10 = 5★).
 export const crearReviewSchema = z.object({
   texto: z.string().min(1, 'La reseña no puede estar vacía').max(5000),
-  puntuacion: z.number().int().min(1).max(5),
+  puntuacion: z.number().int().min(1).max(10),
   contieneSpoiler: z.boolean().default(false),
 });
 
