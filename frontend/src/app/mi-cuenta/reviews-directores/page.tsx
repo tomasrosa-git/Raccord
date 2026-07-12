@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useListaPropia } from '@/lib/hooks/useListaPropia';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EstrellasDisplay } from '@/components/ui/Estrellas';
-import { anioDe } from '@/lib/utils/formatters';
 
 interface Item {
   id: string;
@@ -12,11 +11,11 @@ interface Item {
   puntuacion: number;
   contieneSpoiler: boolean;
   createdAt: string;
-  pelicula: { id: string; titulo: string; fechaEstreno: string | null };
+  persona: { id: string; nombre: string; fotoUrl: string | null };
 }
 
-export default function MisReviews() {
-  const { items, cargando } = useListaPropia<Item>('/usuarios/me/reviews');
+export default function MisReviewsDirectores() {
+  const { items, cargando } = useListaPropia<Item>('/usuarios/me/reviews-persona');
 
   if (cargando) {
     return (
@@ -32,7 +31,7 @@ export default function MisReviews() {
     );
   }
   if (!items || items.length === 0) {
-    return <p className="text-papel/60">Todavía no escribiste reseñas.</p>;
+    return <p className="text-papel/60">Todavía no reseñaste directores.</p>;
   }
 
   return (
@@ -41,19 +40,16 @@ export default function MisReviews() {
         <li key={r.id} className="border-b border-borde py-5">
           <div className="flex flex-wrap items-baseline gap-x-3">
             <Link
-              href={`/pelicula/${r.pelicula.id}`}
+              href={`/cineasta/${r.persona.id}`}
               className="text-papel underline-offset-4 hover:underline"
             >
-              {r.pelicula.titulo}
+              {r.persona.nombre}
             </Link>
-            {anioDe(r.pelicula.fechaEstreno) && (
-              <span className="font-mono text-xs text-papel/40">
-                {anioDe(r.pelicula.fechaEstreno)}
-              </span>
-            )}
             <EstrellasDisplay puntuacion={r.puntuacion} className="text-sm" />
           </div>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-papel/70">{r.texto}</p>
+          <p className="mt-2 max-w-2xl whitespace-pre-line text-sm leading-relaxed text-papel/70">
+            {r.texto}
+          </p>
         </li>
       ))}
     </ul>

@@ -231,3 +231,31 @@ export interface Novedades {
   tendencias: NovedadPelicula[];
   trailers: TrailerNovedad[];
 }
+
+// --- Panteón de directores y perfil público ---
+
+export interface EntradaPanteon {
+  id: string;
+  personaId: string;
+  peliculaFavoritaId: string | null;
+  orden: number;
+  persona: { id: string; nombre: string; fotoUrl: string | null };
+  pelicula: {
+    id: string;
+    titulo: string;
+    posterUrl: string | null;
+    fechaEstreno: string | null;
+  } | null;
+}
+
+export interface PerfilPublico {
+  usuario: {
+    id: string;
+    username: string;
+    avatarUrl: string | null;
+    bio: string | null;
+    createdAt: string;
+  };
+  panteon: EntradaPanteon[];
+  stats: { reviews: number; reviewsPersona: number; siguiendo: number; likes: number };
+}

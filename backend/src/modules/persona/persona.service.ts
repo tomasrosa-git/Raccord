@@ -43,4 +43,12 @@ export const personaService = {
   async dejarDeSeguir(usuarioId: string, personaId: string) {
     await personaRepository.dejarDeSeguir(usuarioId, personaId);
   },
+
+  async miEstado(usuarioId: string, personaId: string) {
+    const [siguiendo, enPanteon] = await Promise.all([
+      personaRepository.estaSiguiendo(usuarioId, personaId),
+      personaRepository.estaEnPanteon(usuarioId, personaId),
+    ]);
+    return { siguiendo, enPanteon };
+  },
 };

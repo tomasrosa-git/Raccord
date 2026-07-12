@@ -17,6 +17,8 @@ import { FirmaVisual } from '@/components/cineasta/FirmaVisual';
 import { ColaboradoresFrecuentes } from '@/components/cineasta/ColaboradoresFrecuentes';
 import { LineaDeTiempo } from '@/components/cineasta/LineaDeTiempo';
 import { PremiosGanados } from '@/components/cineasta/PremiosGanados';
+import { AccionesCineasta } from '@/components/cineasta/AccionesCineasta';
+import { ReviewsDirector } from '@/components/cineasta/ReviewsDirector';
 import { formatearFecha } from '@/lib/utils/formatters';
 import type { PersonaDetalle } from '@/types';
 
@@ -97,6 +99,10 @@ export default async function PaginaCineasta({ params }: Props) {
         </div>
       </header>
 
+      <div className="mt-8">
+        <AccionesCineasta personaId={persona.id} />
+      </div>
+
       {persona.biografia && (
         <section className="mt-12 max-w-3xl">
           <p className="whitespace-pre-line leading-relaxed text-papel/80">
@@ -114,6 +120,7 @@ export default async function PaginaCineasta({ params }: Props) {
         <ColaboradoresFrecuentes colaboradores={colaboradores} />
         <LineaDeTiempo etapas={etapas} />
         <PremiosGanados premios={premios} />
+        <ReviewsDirector personaId={persona.id} />
       </div>
     </article>
   );

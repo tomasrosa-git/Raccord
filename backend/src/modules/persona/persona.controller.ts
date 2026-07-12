@@ -67,3 +67,12 @@ export const dejarDeSeguir: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+export const miEstadoPersona: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = parsear(idParamsSchema, req.params);
+    res.json(await personaService.miEstado(req.usuario!.id, id));
+  } catch (err) {
+    next(err);
+  }
+};

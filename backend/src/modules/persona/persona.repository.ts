@@ -98,4 +98,20 @@ export const personaRepository = {
   dejarDeSeguir(usuarioId: string, personaId: string) {
     return prisma.seguidorPersona.deleteMany({ where: { usuarioId, personaId } });
   },
+
+  async estaSiguiendo(usuarioId: string, personaId: string) {
+    const rel = await prisma.seguidorPersona.findUnique({
+      where: { usuarioId_personaId: { usuarioId, personaId } },
+      select: { personaId: true },
+    });
+    return rel !== null;
+  },
+
+  async estaEnPanteon(usuarioId: string, personaId: string) {
+    const rel = await prisma.directorFavorito.findUnique({
+      where: { usuarioId_personaId: { usuarioId, personaId } },
+      select: { id: true },
+    });
+    return rel !== null;
+  },
 };
