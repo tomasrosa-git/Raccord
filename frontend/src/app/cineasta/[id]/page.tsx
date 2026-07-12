@@ -55,7 +55,7 @@ export default async function PaginaCineasta({ params }: Props) {
   ]);
 
   return (
-    <article className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+    <article className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       {/* Hero del perfil: acá sí hay personalidad. */}
       <header className="flex flex-col gap-8 sm:flex-row sm:items-end">
         {persona.fotoUrl && (

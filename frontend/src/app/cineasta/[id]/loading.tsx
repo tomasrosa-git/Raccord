@@ -19,7 +19,7 @@ function TiraSkeleton() {
 
 export default function CargandoCineasta() {
   return (
-    <article className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+    <article className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
       <header className="flex flex-col gap-8 sm:flex-row sm:items-end">
         <Skeleton className="h-48 w-36 shrink-0 rounded-none sm:h-56 sm:w-40" />
         <div className="flex-1">
