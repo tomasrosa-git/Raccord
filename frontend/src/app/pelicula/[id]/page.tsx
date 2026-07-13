@@ -172,7 +172,13 @@ export default async function PaginaPelicula({ params }: Props) {
             {pelicula.generos.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {pelicula.generos.map((g) => (
-                  <Chip key={g.id}>{g.nombre}</Chip>
+                  <Link
+                    key={g.id}
+                    href={`/explorar?genero=${encodeURIComponent(g.nombre)}`}
+                    className="transition-colors hover:text-papel"
+                  >
+                    <Chip className="hover:border-papel/40">{g.nombre}</Chip>
+                  </Link>
                 ))}
               </div>
             )}

@@ -74,6 +74,11 @@ export interface DueloRonda {
   b: DueloPelicula;
 }
 
+/** Ronda encadenada: una sola rival nueva contra el campeón que se conserva. */
+export interface DueloSiguiente {
+  rival: DueloPelicula;
+}
+
 export interface DueloResultado {
   correcto: boolean;
   ganadoraId: string;
