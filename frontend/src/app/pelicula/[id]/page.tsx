@@ -2,12 +2,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getPelicula, getSimilares, getPaleta } from '@/lib/api/peliculas';
+import { getPelicula, getSimilares, getPaleta, getPlataformas } from '@/lib/api/peliculas';
 import { ApiError } from '@/lib/api/client';
 import { Chip } from '@/components/ui/Chip';
 import { EtiquetaSeccion } from '@/components/ui/EtiquetaSeccion';
 import { FichaTecnica } from '@/components/pelicula/FichaTecnica';
 import { PeliculasSimilares } from '@/components/pelicula/PeliculasSimilares';
+import { PlataformasStreaming } from '@/components/pelicula/PlataformasStreaming';
 import { AccionesPelicula } from '@/components/pelicula/AccionesPelicula';
 import { Reviews } from '@/components/pelicula/Reviews';
 import { anioDe, formatearDuracion } from '@/lib/utils/formatters';
@@ -107,9 +108,10 @@ export default async function PaginaPelicula({ params }: Props) {
   const pelicula = await buscarPelicula(id);
   if (!pelicula) notFound();
 
-  const [similares, paleta] = await Promise.all([
+  const [similares, paleta, plataformas] = await Promise.all([
     getSimilares(id).catch(() => []),
     getPaleta(id).catch(() => []),
+    getPlataformas(id).catch(() => ({ plataformas: [], link: null })),
   ]);
 
   return (
@@ -120,6 +122,8 @@ export default async function PaginaPelicula({ params }: Props) {
         <div className="grid gap-12 lg:grid-cols-[2fr_1fr]">
           <div className="space-y-12">
             <AccionesPelicula peliculaId={pelicula.id} />
+
+            <PlataformasStreaming disponibilidad={plataformas} />
 
             {pelicula.sinopsis && (
               <section>

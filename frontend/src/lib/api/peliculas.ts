@@ -6,6 +6,7 @@ import type {
   ColorSwatch,
   DecadaPeliculas,
   FacetasPeliculas,
+  DisponibilidadStreaming,
 } from '@/types';
 
 // Fichas: ISR de 1 hora. Listados: cache corto de 5 minutos.
@@ -45,6 +46,12 @@ export function getSimilares(id: string) {
 
 export function getPaleta(id: string) {
   return apiGet<ColorSwatch[]>(`/peliculas/${id}/paleta`, { revalidate: REVALIDATE_FICHA });
+}
+
+export function getPlataformas(id: string) {
+  return apiGet<DisponibilidadStreaming>(`/peliculas/${id}/plataformas`, {
+    revalidate: REVALIDATE_FICHA,
+  });
 }
 
 export function getPorDecada() {
