@@ -70,6 +70,7 @@ model Pelicula {
   reviews    Review[]
   watchlist  WatchlistItem[]
   likes      Like[]
+  vistas     Visto[]
   favoritaEn DirectorFavorito[]
 
   @@index([titulo])
@@ -180,6 +181,7 @@ model Usuario {
   reviewsPersona ReviewPersona[]
   watchlist      WatchlistItem[]
   likes          Like[]
+  vistas         Visto[]
   siguiendo      SeguidorPersona[]
   panteon        DirectorFavorito[]
   refreshTokens  RefreshToken[]
@@ -249,6 +251,21 @@ model DirectorFavorito {
 
   @@unique([usuarioId, personaId])
   @@index([usuarioId, orden])
+}
+
+// Marca "ya la vi", independiente de watchlist/like. Base del completista de
+// filmografía: cruzada contra CreditoPelicula (rol DIRECTOR) da el progreso
+// de un usuario sobre la obra de un director.
+model Visto {
+  id         String   @id @default(uuid())
+  usuarioId  String
+  peliculaId String
+  createdAt  DateTime @default(now())
+
+  usuario  Usuario  @relation(fields: [usuarioId], references: [id])
+  pelicula Pelicula @relation(fields: [peliculaId], references: [id])
+
+  @@unique([usuarioId, peliculaId])
 }
 
 model WatchlistItem {

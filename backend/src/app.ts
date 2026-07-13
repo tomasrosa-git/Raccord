@@ -19,6 +19,7 @@ import {
 } from './modules/reviewPersona/reviewPersona.routes';
 import { panteonRouter } from './modules/panteon/panteon.routes';
 import { watchlistRouter, likesRouter, miEstadoPelicula } from './modules/watchlist/watchlist.routes';
+import { vistoRouter } from './modules/visto/visto.routes';
 import { busquedaRouter } from './modules/busqueda/busqueda.routes';
 import { statsRouter } from './modules/stats/stats.routes';
 import { premioRouter } from './modules/premios/premios.routes';
@@ -68,6 +69,7 @@ app.use('/api/reviews-persona', reviewPersonaRouter);
 app.use('/api/panteon', panteonRouter);
 app.use('/api/watchlist', watchlistRouter);
 app.use('/api/likes', likesRouter);
+app.use('/api/vistas', vistoRouter);
 app.use('/api/premios', premioRouter);
 app.use('/api/juegos', juegosRouter);
 app.use('/api/novedades', novedadesRouter);
