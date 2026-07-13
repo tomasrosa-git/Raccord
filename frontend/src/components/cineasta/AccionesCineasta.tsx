@@ -6,11 +6,45 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { Boton } from '@/components/ui/Boton';
 import { cn } from '@/lib/utils/cn';
 
+interface Progreso {
+  vistas: number;
+  total: number;
+}
+
+/** Barra de progreso del completista: cuántas de sus películas ya viste. */
+function BarraProgreso({ progreso }: { progreso: Progreso }) {
+  if (progreso.total === 0) return null;
+  const pct = Math.round((progreso.vistas / progreso.total) * 100);
+  const completo = progreso.vistas === progreso.total;
+
+  return (
+    <div className="max-w-xs">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-mono text-xs text-papel/50">
+          Viste {progreso.vistas} de {progreso.total} películas
+        </p>
+        {completo && (
+          <span className="font-mono text-xs uppercase tracking-wider text-marca-cambio">
+            ★ Completista
+          </span>
+        )}
+      </div>
+      <div className="mt-1.5 h-1 w-full bg-borde">
+        <div
+          className={cn('h-full', completo ? 'bg-marca-cambio' : 'bg-papel/40')}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 /** Toggles de seguir director y sumarlo al panteón, en la ficha de cineasta. */
 export function AccionesCineasta({ personaId }: { personaId: string }) {
   const { usuario, cargando, fetchAuth } = useAuth();
   const [siguiendo, setSiguiendo] = useState(false);
   const [enPanteon, setEnPanteon] = useState(false);
+  const [progreso, setProgreso] = useState<Progreso | null>(null);
   const [listo, setListo] = useState(false);
   const [avisoPanteon, setAvisoPanteon] = useState<string | null>(null);
 
@@ -22,10 +56,11 @@ export function AccionesCineasta({ personaId }: { personaId: string }) {
     let activo = true;
     void fetchAuth(`/personas/${personaId}/mi-estado`)
       .then((res) => (res.ok ? res.json() : null))
-      .then((estado: { siguiendo: boolean; enPanteon: boolean } | null) => {
+      .then((estado: { siguiendo: boolean; enPanteon: boolean; progreso: Progreso } | null) => {
         if (activo && estado) {
           setSiguiendo(estado.siguiendo);
           setEnPanteon(estado.enPanteon);
+          setProgreso(estado.progreso);
           setListo(true);
         }
       });
@@ -96,6 +131,7 @@ export function AccionesCineasta({ personaId }: { personaId: string }) {
         </Boton>
       </div>
       {avisoPanteon && <p className="text-sm text-terciopelo">{avisoPanteon}</p>}
+      {progreso && <BarraProgreso progreso={progreso} />}
     </div>
   );
 }
