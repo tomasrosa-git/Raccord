@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getDueloRonda, resolverDuelo } from '@/lib/api/juegos';
+import { getDueloRonda, getDueloSiguiente, resolverDuelo } from '@/lib/api/juegos';
 import { EtiquetaSeccion } from '@/components/ui/EtiquetaSeccion';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { cn } from '@/lib/utils/cn';
 import { anioDe } from '@/lib/utils/formatters';
-import type { DueloPelicula, DueloRonda, DueloResultado } from '@/types';
+import type { DueloPelicula, DueloResultado } from '@/types';
 
 const CLAVE_RECORD = 'raccord:duelo:record';
 
@@ -28,7 +28,12 @@ function guardarRecord(valor: number) {
   }
 }
 
-/** Una carta del duelo. Tras responder muestra la popularidad real. */
+const formatearPopularidad = (valor: number) => `${valor.toFixed(1)} pts`;
+
+/**
+ * Una carta del duelo. El campeón (la película que el jugador conserva) muestra
+ * su popularidad ya revelada como referencia; la rival la oculta hasta responder.
+ */
 function Carta({
   pelicula,
   onElegir,
@@ -36,6 +41,8 @@ function Carta({
   resultado,
   esGanadora,
   fueElegida,
+  esCampeon,
+  valorCampeon,
 }: {
   pelicula: DueloPelicula;
   onElegir: () => void;
@@ -43,6 +50,8 @@ function Carta({
   resultado: DueloResultado | null;
   esGanadora: boolean;
   fueElegida: boolean;
+  esCampeon: boolean;
+  valorCampeon: number | null;
 }) {
   const anio = anioDe(pelicula.fechaEstreno);
   const popularidad = resultado?.popularidad[pelicula.id];
@@ -58,7 +67,9 @@ function Carta({
           ? esGanadora
             ? 'border-marca-cambio'
             : 'border-borde opacity-60'
-          : 'border-borde hover:border-papel/40'
+          : esCampeon
+            ? 'border-marca-cambio/50'
+            : 'border-borde hover:border-papel/40'
       )}
     >
       <div className="relative aspect-2/3 w-full bg-carbon">
@@ -74,25 +85,39 @@ function Carta({
             )}
           />
         )}
-        {fueElegida && (
-          <span className="absolute left-2 top-2 rounded-sm bg-negro-sala/90 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-papel/70">
-            tu elección
+        {!resultado && esCampeon ? (
+          <span className="absolute left-2 top-2 rounded-sm bg-marca-cambio/90 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-negro-sala">
+            campeón
           </span>
+        ) : (
+          fueElegida && (
+            <span className="absolute left-2 top-2 rounded-sm bg-negro-sala/90 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-papel/70">
+              tu elección
+            </span>
+          )
         )}
       </div>
 
       <div className="bg-negro-sala px-3 py-3">
         <p className="line-clamp-2 text-sm leading-snug text-papel/90">{pelicula.titulo}</p>
         <p className="mt-0.5 font-mono text-xs text-papel/40">{anio ?? ''}</p>
-        {resultado && popularidad != null && (
+        {resultado && popularidad != null ? (
           <p
             className={cn(
               'mt-2 font-mono text-sm',
               esGanadora ? 'text-marca-cambio' : 'text-papel/40'
             )}
           >
-            {popularidad.toFixed(1)} pts
+            {formatearPopularidad(popularidad)}
           </p>
+        ) : (
+          !resultado &&
+          esCampeon &&
+          valorCampeon != null && (
+            <p className="mt-2 font-mono text-sm text-marca-cambio/80">
+              {formatearPopularidad(valorCampeon)}
+            </p>
+          )
         )}
       </div>
     </button>
@@ -100,7 +125,12 @@ function Carta({
 }
 
 export function DueloPopularidad() {
-  const [ronda, setRonda] = useState<DueloRonda | null>(null);
+  const [izquierda, setIzquierda] = useState<DueloPelicula | null>(null);
+  const [derecha, setDerecha] = useState<DueloPelicula | null>(null);
+  // id + popularidad del campeón que se conserva; null en la primera ronda,
+  // donde las dos películas van a ciegas.
+  const [campeonId, setCampeonId] = useState<string | null>(null);
+  const [campeonValor, setCampeonValor] = useState<number | null>(null);
   const [resultado, setResultado] = useState<DueloResultado | null>(null);
   const [elegidaId, setElegidaId] = useState<string | null>(null);
   const [racha, setRacha] = useState(0);
@@ -109,12 +139,16 @@ export function DueloPopularidad() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(false);
 
-  const cargarRonda = useCallback(async () => {
+  const nuevaPartida = useCallback(async () => {
     setCargando(true);
     setResultado(null);
     setElegidaId(null);
+    setCampeonId(null);
+    setCampeonValor(null);
     try {
-      setRonda(await getDueloRonda());
+      const ronda = await getDueloRonda();
+      setIzquierda(ronda.a);
+      setDerecha(ronda.b);
     } catch {
       setError(true);
     } finally {
@@ -124,14 +158,14 @@ export function DueloPopularidad() {
 
   useEffect(() => {
     setRecord(leerRecord());
-    void cargarRonda();
-  }, [cargarRonda]);
+    void nuevaPartida();
+  }, [nuevaPartida]);
 
   async function elegir(pelicula: DueloPelicula) {
-    if (!ronda || resultado || cargando) return;
+    if (!izquierda || !derecha || resultado || cargando) return;
     setElegidaId(pelicula.id);
     try {
-      const res = await resolverDuelo(ronda.a.id, ronda.b.id, pelicula.id);
+      const res = await resolverDuelo(izquierda.id, derecha.id, pelicula.id);
       setResultado(res);
 
       if (res.correcto) {
@@ -149,15 +183,41 @@ export function DueloPopularidad() {
     }
   }
 
+  /** El jugador acertó: conserva la ganadora y enfrenta una sola rival nueva. */
+  async function siguienteRonda() {
+    if (!resultado || !izquierda || !derecha) return;
+    const ganadora = [izquierda, derecha].find((p) => p.id === resultado.ganadoraId);
+    if (!ganadora) return;
+    const valor = resultado.popularidad[ganadora.id] ?? null;
+
+    // El campeón queda a la izquierda con su valor revelado; la rival se carga
+    // en el hueco de la derecha (skeleton hasta que llega).
+    setIzquierda(ganadora);
+    setDerecha(null);
+    setCampeonId(ganadora.id);
+    setCampeonValor(valor);
+    setResultado(null);
+    setElegidaId(null);
+
+    try {
+      const { rival } = await getDueloSiguiente(ganadora.id);
+      setDerecha(rival);
+    } catch {
+      setError(true);
+    }
+  }
+
   function reiniciar() {
     setRacha(0);
     setPerdido(false);
-    void cargarRonda();
+    void nuevaPartida();
   }
 
   if (error) {
     return <p className="text-papel/60">No pudimos cargar el duelo. Probá más tarde.</p>;
   }
+
+  const cartas = [izquierda, derecha];
 
   return (
     <div>
@@ -171,29 +231,43 @@ export function DueloPopularidad() {
       </div>
 
       <p className="mt-6 text-center text-sm text-papel/60">
-        ¿Cuál es <span className="text-papel">más popular hoy</span>?
+        {campeonId ? (
+          <>
+            ¿La rival <span className="text-papel">supera al campeón</span>?
+          </>
+        ) : (
+          <>
+            ¿Cuál es <span className="text-papel">más popular hoy</span>?
+          </>
+        )}
       </p>
 
       {/* Acotado a propósito: dos pósters a tamaño completo se comparan peor
           que dos chicos, lado a lado y abarcables de una mirada. */}
       <div className="mx-auto mt-6 grid max-w-sm grid-cols-2 gap-4 sm:gap-6">
-        {!ronda || cargando ? (
+        {cargando ? (
           <>
             <Skeleton className="aspect-2/3 w-full rounded-none" />
             <Skeleton className="aspect-2/3 w-full rounded-none" />
           </>
         ) : (
-          [ronda.a, ronda.b].map((p) => (
-            <Carta
-              key={p.id}
-              pelicula={p}
-              onElegir={() => elegir(p)}
-              deshabilitado={!!resultado}
-              resultado={resultado}
-              esGanadora={resultado?.ganadoraId === p.id}
-              fueElegida={elegidaId === p.id}
-            />
-          ))
+          cartas.map((p, i) =>
+            p ? (
+              <Carta
+                key={p.id}
+                pelicula={p}
+                onElegir={() => elegir(p)}
+                deshabilitado={!!resultado || !izquierda || !derecha}
+                resultado={resultado}
+                esGanadora={resultado?.ganadoraId === p.id}
+                fueElegida={elegidaId === p.id}
+                esCampeon={campeonId === p.id}
+                valorCampeon={campeonValor}
+              />
+            ) : (
+              <Skeleton key={`hueco-${i}`} className="aspect-2/3 w-full rounded-none" />
+            )
+          )
         )}
       </div>
 
@@ -218,10 +292,10 @@ export function DueloPopularidad() {
           ) : (
             <button
               type="button"
-              onClick={() => void cargarRonda()}
+              onClick={() => void siguienteRonda()}
               className="mt-4 rounded-sm bg-marca-cambio px-5 py-2.5 text-sm font-medium text-negro-sala transition-[filter] hover:brightness-110"
             >
-              Siguiente duelo →
+              Siguiente rival →
             </button>
           )}
 

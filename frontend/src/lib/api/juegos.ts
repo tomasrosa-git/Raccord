@@ -4,6 +4,7 @@ import type {
   FrameGuessIntento,
   FrameGuessSolucion,
   DueloRonda,
+  DueloSiguiente,
   DueloResultado,
   DueloTaquillaResultado,
   IntrusoRonda,
@@ -29,6 +30,14 @@ export function getDueloRonda() {
   return apiGet<DueloRonda>('/juegos/duelo/ronda', { sinCache: true });
 }
 
+/** Ronda encadenada: una rival nueva contra el campeón que el jugador conserva. */
+export function getDueloSiguiente(conservarId: string) {
+  return apiGet<DueloSiguiente>(
+    `/juegos/duelo/siguiente?conservarId=${conservarId}`,
+    { sinCache: true }
+  );
+}
+
 export function resolverDuelo(aId: string, bId: string, elegidaId: string) {
   return apiPost<DueloResultado>('/juegos/duelo/resolver', { aId, bId, elegidaId });
 }
@@ -36,6 +45,14 @@ export function resolverDuelo(aId: string, bId: string, elegidaId: string) {
 /** Duelo de taquilla: la ronda no trae la recaudación — es lo que se adivina. */
 export function getDueloTaquillaRonda() {
   return apiGet<DueloRonda>('/juegos/duelo-taquilla/ronda', { sinCache: true });
+}
+
+/** Ronda encadenada de taquilla: rival nueva contra el campeón conservado. */
+export function getDueloTaquillaSiguiente(conservarId: string) {
+  return apiGet<DueloSiguiente>(
+    `/juegos/duelo-taquilla/siguiente?conservarId=${conservarId}`,
+    { sinCache: true }
+  );
 }
 
 export function resolverDueloTaquilla(aId: string, bId: string, elegidaId: string) {

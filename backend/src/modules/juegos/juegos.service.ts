@@ -113,6 +113,30 @@ export const duelo = {
     return { a: sinPopularidad(a), b: sinPopularidad(b) };
   },
 
+  /**
+   * Ronda encadenada: el jugador conserva la película que ganó y enfrenta una
+   * sola rival nueva (mecánica higher/lower). Así la racha se construye
+   * defendiendo al mismo campeón, en vez de arrancar de cero con dos películas
+   * nuevas cada vez.
+   */
+  async siguienteRonda(conservarId: string) {
+    const pool = await poolDuelo();
+    const campeon = pool.find((p) => p.id === conservarId);
+    if (!campeon) throw AppError.notFound('Película no encontrada en el duelo');
+
+    const candidatos = pool.filter((p) => p.id !== conservarId);
+    let rival = alAzar(candidatos);
+    for (let i = 0; i < INTENTOS_PAR; i++) {
+      const ratio =
+        Math.max(campeon.popularity!, rival.popularity!) /
+        Math.min(campeon.popularity!, rival.popularity!);
+      if (Number.isFinite(ratio) && ratio >= RATIO_MINIMO) break;
+      rival = alAzar(candidatos);
+    }
+
+    return { rival: sinPopularidad(rival) };
+  },
+
   /** Valida la elección contra la popularidad real, que nunca salió del server. */
   async resolver(aId: string, bId: string, elegidaId: string) {
     if (aId === bId) throw AppError.badRequest('Las películas del duelo deben ser distintas');
@@ -174,6 +198,25 @@ export const dueloTaquilla = {
     }
 
     return { a: sinRecaudacion(a), b: sinRecaudacion(b) };
+  },
+
+  /** Ronda encadenada: se conserva el campeón y aparece una sola rival nueva. */
+  async siguienteRonda(conservarId: string) {
+    const pool = await poolDueloTaquilla();
+    const campeon = pool.find((p) => p.id === conservarId);
+    if (!campeon) throw AppError.notFound('Película no encontrada en el duelo');
+
+    const candidatos = pool.filter((p) => p.id !== conservarId);
+    let rival = alAzar(candidatos);
+    for (let i = 0; i < INTENTOS_PAR; i++) {
+      const ratio =
+        Math.max(campeon.recaudacion!, rival.recaudacion!) /
+        Math.min(campeon.recaudacion!, rival.recaudacion!);
+      if (Number.isFinite(ratio) && ratio >= RATIO_MINIMO_TAQUILLA) break;
+      rival = alAzar(candidatos);
+    }
+
+    return { rival: sinRecaudacion(rival) };
   },
 
   /** Valida la elección contra la recaudación real, que nunca salió del server. */

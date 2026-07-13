@@ -1,6 +1,11 @@
 import type { RequestHandler } from 'express';
 import { parsear } from '../../middlewares/validateRequest';
-import { intentoBodySchema, dueloBodySchema, intrusoBodySchema } from './juegos.schema';
+import {
+  intentoBodySchema,
+  dueloBodySchema,
+  dueloSiguienteQuerySchema,
+  intrusoBodySchema,
+} from './juegos.schema';
 import { juegosService, duelo, dueloTaquilla, intruso } from './juegos.service';
 
 export const frameGuessHoy: RequestHandler = async (_req, res, next) => {
@@ -36,6 +41,15 @@ export const dueloRonda: RequestHandler = async (_req, res, next) => {
   }
 };
 
+export const dueloSiguiente: RequestHandler = async (req, res, next) => {
+  try {
+    const { conservarId } = parsear(dueloSiguienteQuerySchema, req.query);
+    res.json(await duelo.siguienteRonda(conservarId));
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const dueloResolver: RequestHandler = async (req, res, next) => {
   try {
     const { aId, bId, elegidaId } = parsear(dueloBodySchema, req.body);
@@ -48,6 +62,15 @@ export const dueloResolver: RequestHandler = async (req, res, next) => {
 export const dueloTaquillaRonda: RequestHandler = async (_req, res, next) => {
   try {
     res.json(await dueloTaquilla.nuevaRonda());
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const dueloTaquillaSiguiente: RequestHandler = async (req, res, next) => {
+  try {
+    const { conservarId } = parsear(dueloSiguienteQuerySchema, req.query);
+    res.json(await dueloTaquilla.siguienteRonda(conservarId));
   } catch (err) {
     next(err);
   }

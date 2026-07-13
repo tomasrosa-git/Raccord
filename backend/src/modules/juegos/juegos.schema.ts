@@ -10,6 +10,11 @@ export const dueloBodySchema = z.object({
   elegidaId: z.string().uuid('elegidaId inválido'),
 });
 
+/** Ronda encadenada: la película que se conserva (el campeón) contra una rival nueva. */
+export const dueloSiguienteQuerySchema = z.object({
+  conservarId: z.string().uuid('conservarId inválido'),
+});
+
 export const intrusoBodySchema = z.object({
   ids: z.array(z.string().uuid('id inválido')).length(4, 'La ronda debe tener 4 películas'),
   categoria: z.enum(['director', 'protagonista', 'decada', 'genero']),
