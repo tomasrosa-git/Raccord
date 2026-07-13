@@ -64,33 +64,27 @@ async function upsertGeneros(nombres: string[]) {
 }
 
 async function guardarPelicula(detalle: TmdbPeliculaDetalle) {
+  // TMDB devuelve 0 cuando no tiene el dato: presupuesto/recaudación 0 no
+  // existen en la práctica, así que ese 0 es "desconocido" → null.
+  const campos = {
+    titulo: detalle.title,
+    tituloOriginal: detalle.original_title,
+    sinopsis: detalle.overview || null,
+    fechaEstreno: detalle.release_date ? new Date(detalle.release_date) : null,
+    duracionMin: detalle.runtime || null,
+    posterUrl: detalle.poster_path ? tmdbImageUrl.poster(detalle.poster_path) : null,
+    backdropUrl: detalle.backdrop_path ? tmdbImageUrl.backdrop(detalle.backdrop_path) : null,
+    popularity: detalle.popularity ?? null,
+    votoPromedio: detalle.vote_count > 0 ? detalle.vote_average : null,
+    votoConteo: detalle.vote_count ?? null,
+    presupuesto: detalle.budget > 0 ? detalle.budget : null,
+    recaudacion: detalle.revenue > 0 ? detalle.revenue : null,
+  };
+
   const pelicula = await prisma.pelicula.upsert({
     where: { tmdbId: detalle.id },
-    update: {
-      titulo: detalle.title,
-      tituloOriginal: detalle.original_title,
-      sinopsis: detalle.overview || null,
-      fechaEstreno: detalle.release_date ? new Date(detalle.release_date) : null,
-      duracionMin: detalle.runtime || null,
-      posterUrl: detalle.poster_path ? tmdbImageUrl.poster(detalle.poster_path) : null,
-      backdropUrl: detalle.backdrop_path ? tmdbImageUrl.backdrop(detalle.backdrop_path) : null,
-      popularity: detalle.popularity ?? null,
-      votoPromedio: detalle.vote_count > 0 ? detalle.vote_average : null,
-      votoConteo: detalle.vote_count ?? null,
-    },
-    create: {
-      tmdbId: detalle.id,
-      titulo: detalle.title,
-      tituloOriginal: detalle.original_title,
-      sinopsis: detalle.overview || null,
-      fechaEstreno: detalle.release_date ? new Date(detalle.release_date) : null,
-      duracionMin: detalle.runtime || null,
-      posterUrl: detalle.poster_path ? tmdbImageUrl.poster(detalle.poster_path) : null,
-      backdropUrl: detalle.backdrop_path ? tmdbImageUrl.backdrop(detalle.backdrop_path) : null,
-      popularity: detalle.popularity ?? null,
-      votoPromedio: detalle.vote_count > 0 ? detalle.vote_average : null,
-      votoConteo: detalle.vote_count ?? null,
-    },
+    update: campos,
+    create: { tmdbId: detalle.id, ...campos },
   });
 
   // Géneros: se reconstruye la relación completa (idempotente).

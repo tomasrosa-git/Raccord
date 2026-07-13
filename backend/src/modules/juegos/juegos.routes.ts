@@ -5,6 +5,8 @@ import {
   frameGuessSolucion,
   dueloRonda,
   dueloResolver,
+  dueloTaquillaRonda,
+  dueloTaquillaResolver,
   intrusoRonda,
   intrusoResolver,
 } from './juegos.controller';
@@ -17,6 +19,9 @@ juegosRouter.post('/frame-guess/solucion', frameGuessSolucion);
 
 juegosRouter.get('/duelo/ronda', dueloRonda);
 juegosRouter.post('/duelo/resolver', dueloResolver);
+
+juegosRouter.get('/duelo-taquilla/ronda', dueloTaquillaRonda);
+juegosRouter.post('/duelo-taquilla/resolver', dueloTaquillaResolver);
 
 juegosRouter.get('/intruso/ronda', intrusoRonda);
 juegosRouter.post('/intruso/resolver', intrusoResolver);

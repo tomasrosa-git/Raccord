@@ -61,6 +61,12 @@ model Pelicula {
   popularity     Float? // popularidad de TMDB (criterio de "lo más importante por década")
   votoPromedio   Float? // nota media de TMDB, 0–10 (se actualiza en cada sync)
   votoConteo     Int? // cantidad de votos que respaldan la nota (piso para el ranking)
+  // Presupuesto y recaudación en dólares (de TMDB). Float y no Int: la
+  // recaudación supera los ~2.1e9 que aguanta un INTEGER (Avatar, Titanic…), y
+  // Float es exacto para enteros hasta 2^53 y serializa a JSON sin la fricción
+  // de BigInt. 0 en TMDB = dato desconocido → se guarda null.
+  presupuesto    Float? // budget
+  recaudacion    Float? // revenue (la "taquilla")
   createdAt      DateTime  @default(now())
 
   generos    PeliculaGenero[]

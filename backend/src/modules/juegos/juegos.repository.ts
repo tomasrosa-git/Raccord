@@ -57,6 +57,23 @@ export const juegosRepository = {
   },
 
   /**
+   * Pool del Duelo de taquilla: largometrajes con póster y recaudación conocida.
+   * La mayoría del catálogo no tiene el dato en TMDB, así que el filtro por
+   * `recaudacion` acota bastante — de ahí que sea su propio pool y no el del
+   * duelo de popularidad.
+   */
+  peliculasParaDueloTaquilla() {
+    return prisma.pelicula.findMany({
+      where: {
+        posterUrl: { not: null },
+        recaudacion: { not: null },
+        duracionMin: { gte: MIN_DURACION_MIN },
+      },
+      select: { id: true, titulo: true, posterUrl: true, fechaEstreno: true, recaudacion: true },
+    });
+  },
+
+  /**
    * Catálogo liviano para El Intruso: cada película con póster junto con los
    * atributos por los que se puede agrupar (director, protagonistas, géneros,
    * década). Se carga una vez (cacheado en el service) y las rondas se arman en
