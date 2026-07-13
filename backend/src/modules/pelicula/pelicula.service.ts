@@ -1,6 +1,8 @@
 import { AppError } from '../../shared/errors/AppError';
 import { conCache } from '../../shared/utils/cache';
 import { CACHE_TTL_SEGUNDOS } from '../../config/constants';
+import { getTmdbClient, tmdbImageUrl } from '../../integrations/tmdb/tmdb.client';
+import type { TmdbProveedor } from '../../integrations/tmdb/tmdb.types';
 import { peliculaRepository } from './pelicula.repository';
 import type { ListarPeliculasQuery } from './pelicula.schema';
 
@@ -93,6 +95,44 @@ export const peliculaService = {
     const existe = await peliculaRepository.existe(id);
     if (!existe) throw AppError.notFound('Película no encontrada');
     return peliculaRepository.buscarPaleta(id);
+  },
+
+  /**
+   * Dónde ver la película en Argentina (datos de JustWatch vía TMDB, en vivo y
+   * cacheados). "Dónde verla" = apps donde se mira in-app: suscripción, gratis
+   * y gratis con publicidad. Alquiler/compra quedan afuera a propósito — la idea
+   * es "en qué app la tengo", tipo Netflix/Max/Prime, no dónde alquilarla.
+   */
+  async obtenerPlataformas(id: string) {
+    const pelicula = await peliculaRepository.buscarTmdbId(id);
+    if (!pelicula) throw AppError.notFound('Película no encontrada');
+
+    return conCache(`peliculas:plataformas:${id}`, CACHE_TTL_SEGUNDOS.plataformas, async () => {
+      const data = await getTmdbClient().getProveedores(pelicula.tmdbId);
+      const ar = data.results.AR;
+      if (!ar) return { plataformas: [], link: null };
+
+      const crudas = [...(ar.flatrate ?? []), ...(ar.free ?? []), ...(ar.ads ?? [])]
+        // "MUBI Amazon Channel", "Paramount+ Amazon Channel"… son add-ons de
+        // facturación que duplican la app base (MUBI, Paramount+). Se descartan
+        // para no mostrar dos veces la misma plataforma.
+        .filter((p) => !/(Amazon|Apple TV) Channel$/i.test(p.provider_name));
+
+      // Una plataforma puede figurar en más de una categoría (flatrate + ads):
+      // se deduplica por provider_id conservando la primera aparición.
+      const porId = new Map<number, TmdbProveedor>();
+      for (const p of crudas) if (!porId.has(p.provider_id)) porId.set(p.provider_id, p);
+
+      const plataformas = [...porId.values()]
+        .sort((a, b) => a.display_priority - b.display_priority)
+        .map((p) => ({
+          id: p.provider_id,
+          nombre: p.provider_name,
+          logoUrl: p.logo_path ? tmdbImageUrl.logo(p.logo_path) : null,
+        }));
+
+      return { plataformas, link: ar.link ?? null };
+    });
   },
 
   /**

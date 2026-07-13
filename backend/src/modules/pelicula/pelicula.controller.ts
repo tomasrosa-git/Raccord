@@ -54,3 +54,12 @@ export const paleta: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
+export const plataformas: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = parsear(idParamsSchema, req.params);
+    res.json(await peliculaService.obtenerPlataformas(id));
+  } catch (err) {
+    next(err);
+  }
+};
