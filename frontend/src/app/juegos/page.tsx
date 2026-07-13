@@ -22,6 +22,14 @@ const JUEGOS = [
     cadencia: 'Partidas ilimitadas',
     disponible: true,
   },
+  {
+    href: '/juegos/duelo-taquilla',
+    nombre: 'Duelo de taquilla',
+    descripcion:
+      'Dos películas del catálogo: adiviná cuál recaudó más en la taquilla mundial. Hasta que falles.',
+    cadencia: 'Partidas ilimitadas',
+    disponible: true,
+  },
 ];
 
 export default function PaginaJuegos() {

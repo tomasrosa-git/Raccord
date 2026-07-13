@@ -81,6 +81,13 @@ export interface DueloResultado {
   popularidad: Record<string, number | null>;
 }
 
+export interface DueloTaquillaResultado {
+  correcto: boolean;
+  ganadoraId: string;
+  /** recaudación en USD de cada película del duelo, por id */
+  recaudacion: Record<string, number | null>;
+}
+
 export type CategoriaIntruso = 'director' | 'protagonista' | 'decada' | 'genero';
 
 export interface IntrusoPelicula {
@@ -112,6 +119,8 @@ export interface PeliculaDetalle {
   posterUrl: string | null;
   backdropUrl: string | null;
   votoPromedio: number | null;
+  presupuesto: number | null; // en USD
+  recaudacion: number | null; // en USD (la "taquilla")
   generos: { id: string; nombre: string }[];
   directores: PersonaResumen[];
   cast: (PersonaResumen & { personaje: string | null })[];
