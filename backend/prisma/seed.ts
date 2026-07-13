@@ -13,7 +13,17 @@ import { tmdbSyncService } from '../src/integrations/tmdb/tmdb.sync.service';
 // `nombreForzado` pisa el nombre canónico de TMDB tras el sync — para casos
 // como Wong Kar-wai, cuyo nombre primario en TMDB está en caracteres chinos
 // (王家衛) y sería inencontrable para el público hispanohablante.
-const DIRECTORES: { nombre: string; curado?: boolean; tmdbId?: number; nombreForzado?: boolean }[] = [
+// `forzarResync` ignora `--solo-nuevos`: para directores que ya tienen
+// créditos en la base pero incompletos (entraron de rebote como
+// co-directores en películas de otros directores curados, ej. filmes de
+// segmentos) — hay que volver a traer la filmografía completa.
+const DIRECTORES: {
+  nombre: string;
+  curado?: boolean;
+  tmdbId?: number;
+  nombreForzado?: boolean;
+  forzarResync?: boolean;
+}[] = [
   // --- Primera tanda: los 15 fundacionales ---
   { nombre: 'Wes Anderson', curado: true },
   { nombre: 'Pedro Almodóvar', curado: true },
@@ -105,6 +115,72 @@ const DIRECTORES: { nombre: string; curado?: boolean; tmdbId?: number; nombreFor
   { nombre: 'Lisandro Alonso', tmdbId: 1002601 },
   { nombre: 'Gaspar Noé', tmdbId: 14597 },
   { nombre: 'Alejandro Jodorowsky', tmdbId: 55119 },
+
+  // --- Cuarta tanda (Fase 24): completar filmografías incompletas + canon
+  //     histórico faltante + directores de franquicias masivas (Marvel,
+  //     Star Wars, DC y otras), que además suman al catálogo a los actores
+  //     más conocidos como reparto. IDs verificados a mano vía búsqueda TMDB
+  //     por departamento (Directing) + popularidad, descartando homónimos.
+  //     Completar filmografía: ya estaban en la base con créditos parciales
+  //     (entraron de rebote como co-directores en películas de otros
+  //     directores curados, ej. filmes de segmentos). Ya resincronizados
+  //     por completo — sin `forzarResync` para no repetir el trabajo.
+  { nombre: 'Jean-Luc Godard', tmdbId: 3776 },
+  { nombre: 'Federico Fellini', tmdbId: 4415 },
+  { nombre: 'Francis Ford Coppola', tmdbId: 1776 },
+  { nombre: 'Joel Coen', tmdbId: 1223 },
+  { nombre: 'Ethan Coen', tmdbId: 1224 },
+  { nombre: 'Woody Allen', tmdbId: 1243 },
+  { nombre: 'Roman Polanski', tmdbId: 3556 },
+  { nombre: 'Ridley Scott', tmdbId: 578 },
+  { nombre: 'Spike Lee', tmdbId: 5281 },
+  { nombre: 'Ken Loach', tmdbId: 15488 },
+  { nombre: 'Claude Chabrol', tmdbId: 19069 },
+  { nombre: 'Alain Resnais', tmdbId: 11983 },
+  { nombre: 'Jacques Rivette', tmdbId: 73153 },
+  { nombre: 'Chris Marker', tmdbId: 9956 },
+  { nombre: 'Costa-Gavras', tmdbId: 27436 },
+  { nombre: 'Zhang Yimou', tmdbId: 607 },
+  { nombre: 'Víctor Erice', tmdbId: 37833 },
+  { nombre: 'Walter Salles', tmdbId: 8574 },
+  { nombre: 'Isabel Coixet', tmdbId: 90 },
+  { nombre: 'Taika Waititi', tmdbId: 55934 },
+  { nombre: 'Jon Favreau', tmdbId: 15277 },
+  //     Canon histórico faltante. `forzarResync` en los que ya habían
+  //     entrado parciales por el mismo mecanismo de rebote (detectado
+  //     recién en esta corrida: "ya existentes salteados").
+  { nombre: 'Krzysztof Kieślowski', tmdbId: 1126, forzarResync: true },
+  { nombre: 'David Cronenberg', tmdbId: 224, forzarResync: true },
+  { nombre: 'Sergio Leone', tmdbId: 4385, forzarResync: true },
+  { nombre: 'Fritz Lang', tmdbId: 68 },
+  { nombre: 'Sergei Eisenstein', tmdbId: 9603, nombreForzado: true },
+  { nombre: 'Jane Campion', tmdbId: 10757, forzarResync: true },
+  { nombre: 'Kathryn Bigelow', tmdbId: 14392 },
+  { nombre: 'Paul Verhoeven', tmdbId: 10491, forzarResync: true },
+  { nombre: 'Terry Gilliam', tmdbId: 280, forzarResync: true },
+  { nombre: 'Carlos Saura', tmdbId: 96369, forzarResync: true },
+  { nombre: 'Pablo Trapero', tmdbId: 56210, forzarResync: true },
+  { nombre: 'Mariano Llinás', tmdbId: 1293509 },
+  { nombre: 'Lucía Puenzo', tmdbId: 69309 },
+  { nombre: 'Santiago Mitre', tmdbId: 84677 },
+  { nombre: 'Michel Franco', tmdbId: 1082434 },
+  //     Franquicias masivas (Marvel, Star Wars, DC y otras)
+  { nombre: 'George Lucas', tmdbId: 1, forzarResync: true },
+  { nombre: 'J.J. Abrams', tmdbId: 15344 },
+  { nombre: 'Rian Johnson', tmdbId: 67367 },
+  { nombre: 'Anthony Russo', tmdbId: 19271 },
+  { nombre: 'Joe Russo', tmdbId: 19272, forzarResync: true },
+  { nombre: 'James Gunn', tmdbId: 15218 },
+  { nombre: 'Ryan Coogler', tmdbId: 1056121 },
+  { nombre: 'Sam Raimi', tmdbId: 7623 },
+  { nombre: 'Joss Whedon', tmdbId: 12891 },
+  { nombre: 'Zack Snyder', tmdbId: 15217 },
+  { nombre: 'Matt Reeves', tmdbId: 32278 },
+  { nombre: 'Peter Jackson', tmdbId: 108 },
+  { nombre: 'David Yates', tmdbId: 11343 },
+  { nombre: 'Gareth Edwards', tmdbId: 129894 },
+  { nombre: 'Colin Trevorrow', tmdbId: 930707 },
+  { nombre: 'J.A. Bayona', tmdbId: 51894 },
 ];
 
 /** true si la persona ya está sincronizada como director (tiene créditos de dirección). */
@@ -142,7 +218,7 @@ async function main() {
       }
     };
 
-    if (soloNuevos && (await yaSincronizado(tmdbId))) {
+    if (soloNuevos && !director.forzarResync && (await yaSincronizado(tmdbId))) {
       await forzarNombre();
       salteados++;
       continue;
