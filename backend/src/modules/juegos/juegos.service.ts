@@ -134,6 +134,72 @@ export const duelo = {
   },
 };
 
+// --- Duelo de taquilla ----------------------------------------------------
+
+/**
+ * Diferencia mínima de recaudación entre las dos películas. Más laxo que en
+ * popularidad (1.2): la taquilla se reparte en órdenes de magnitud muy amplios,
+ * y exigir un 20% de diferencia dejaría afuera comparaciones interesantes entre
+ * dos taquillazos parejos.
+ */
+const RATIO_MINIMO_TAQUILLA = 1.15;
+
+type PeliculaDueloTaquilla = Awaited<
+  ReturnType<typeof juegosRepository.peliculasParaDueloTaquilla>
+>[number];
+
+async function poolDueloTaquilla() {
+  const pool = await conCache('juegos:pool-duelo-taquilla', CACHE_TTL_SEGUNDOS.juegos, () =>
+    juegosRepository.peliculasParaDueloTaquilla()
+  );
+  if (pool.length < 2) throw AppError.notFound('No hay suficientes películas para el duelo');
+  return pool;
+}
+
+/** Sin la recaudación: es justo lo que el jugador tiene que adivinar. */
+const sinRecaudacion = ({ recaudacion: _r, ...datos }: PeliculaDueloTaquilla) => datos;
+
+export const dueloTaquilla = {
+  async nuevaRonda() {
+    const pool = await poolDueloTaquilla();
+
+    let a = alAzar(pool);
+    let b = alAzar(pool);
+    for (let i = 0; i < INTENTOS_PAR; i++) {
+      const ratio =
+        Math.max(a.recaudacion!, b.recaudacion!) / Math.min(a.recaudacion!, b.recaudacion!);
+      if (a.id !== b.id && Number.isFinite(ratio) && ratio >= RATIO_MINIMO_TAQUILLA) break;
+      a = alAzar(pool);
+      b = alAzar(pool);
+    }
+
+    return { a: sinRecaudacion(a), b: sinRecaudacion(b) };
+  },
+
+  /** Valida la elección contra la recaudación real, que nunca salió del server. */
+  async resolver(aId: string, bId: string, elegidaId: string) {
+    if (aId === bId) throw AppError.badRequest('Las películas del duelo deben ser distintas');
+    if (elegidaId !== aId && elegidaId !== bId) {
+      throw AppError.badRequest('La elección debe ser una de las dos películas');
+    }
+
+    const pool = await poolDueloTaquilla();
+    const a = pool.find((p) => p.id === aId);
+    const b = pool.find((p) => p.id === bId);
+    if (!a || !b) throw AppError.notFound('Película no encontrada en el duelo');
+
+    const ganadora = a.recaudacion! >= b.recaudacion! ? a : b;
+    return {
+      correcto: ganadora.id === elegidaId,
+      ganadoraId: ganadora.id,
+      recaudacion: { [a.id]: a.recaudacion, [b.id]: b.recaudacion } as Record<
+        string,
+        number | null
+      >,
+    };
+  },
+};
+
 function solucionDe(pelicula: Awaited<ReturnType<typeof peliculaDelDia>>) {
   return {
     id: pelicula.id,

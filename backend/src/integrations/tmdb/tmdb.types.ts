@@ -58,6 +58,8 @@ export interface TmdbPeliculaDetalle {
   popularity: number;
   vote_average: number; // nota media de TMDB, 0–10
   vote_count: number;
+  budget: number; // presupuesto en USD; 0 si TMDB no lo tiene
+  revenue: number; // recaudación en USD; 0 si TMDB no lo tiene
   genres: TmdbGenero[];
   credits?: TmdbCreditos;
 }

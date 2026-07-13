@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { PeliculaDetalle } from '@/types';
-import { NOMBRE_ROL, formatearDuracion, formatearFecha } from '@/lib/utils/formatters';
+import { NOMBRE_ROL, formatearDinero, formatearDuracion, formatearFecha } from '@/lib/utils/formatters';
 
 function Fila({ etiqueta, children }: { etiqueta: string; children: React.ReactNode }) {
   return (
@@ -53,6 +53,22 @@ export function FichaTecnica({ pelicula }: { pelicula: PeliculaDetalle }) {
         <Fila etiqueta="Duración">{formatearDuracion(pelicula.duracionMin)}</Fila>
       )}
       {pelicula.aspectRatio && <Fila etiqueta="Formato">{pelicula.aspectRatio}</Fila>}
+      {formatearDinero(pelicula.presupuesto) && (
+        <Fila etiqueta="Presupuesto">{formatearDinero(pelicula.presupuesto)}</Fila>
+      )}
+      {formatearDinero(pelicula.recaudacion) && (
+        <Fila etiqueta="Recaudación">
+          {formatearDinero(pelicula.recaudacion)}
+          {pelicula.presupuesto != null &&
+            pelicula.recaudacion != null &&
+            pelicula.presupuesto > 0 && (
+              <span className="text-papel/40">
+                {' · '}
+                {(pelicula.recaudacion / pelicula.presupuesto).toFixed(1)}× presupuesto
+              </span>
+            )}
+        </Fila>
+      )}
       {pelicula.votoPromedio != null && (
         <Fila etiqueta="Valoración">
           <span className="text-marca-cambio">★</span> {pelicula.votoPromedio.toFixed(1)}
