@@ -116,3 +116,27 @@ export interface TmdbVideo {
 export interface TmdbVideosPelicula {
   results: TmdbVideo[];
 }
+
+// --- Dónde ver (watch providers, datos de JustWatch vía TMDB) ---
+
+export interface TmdbProveedor {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+  display_priority: number; // orden sugerido por TMDB/JustWatch
+}
+
+/** Disponibilidad de una película en un país: por suscripción, alquiler, etc. */
+export interface TmdbProveedoresPais {
+  link: string; // página de JustWatch/TMDB con el detalle de dónde verla
+  flatrate?: TmdbProveedor[]; // incluida en la suscripción (Netflix, Max, …)
+  free?: TmdbProveedor[]; // gratis
+  ads?: TmdbProveedor[]; // gratis con publicidad
+  rent?: TmdbProveedor[]; // alquiler
+  buy?: TmdbProveedor[]; // compra
+}
+
+export interface TmdbProveedoresPelicula {
+  id: number;
+  results: Record<string, TmdbProveedoresPais | undefined>; // por código de país ("AR", "US", …)
+}

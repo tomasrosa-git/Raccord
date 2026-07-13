@@ -5,6 +5,9 @@ export const CACHE_TTL_SEGUNDOS = {
   firmaVisual: 3600,
   decadas: 3600,
   juegos: 3600,
+  // La disponibilidad en streaming cambia de a días, no de a minutos: 6 h
+  // alcanza y evita pegarle a TMDB por cada visita a una ficha.
+  plataformas: 21600,
 } as const;
 
 export const RATE_LIMIT_LOGIN = {

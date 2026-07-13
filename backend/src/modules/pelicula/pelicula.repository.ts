@@ -154,4 +154,8 @@ export const peliculaRepository = {
   existe(id: string) {
     return prisma.pelicula.findUnique({ where: { id }, select: { id: true } });
   },
+
+  buscarTmdbId(id: string) {
+    return prisma.pelicula.findUnique({ where: { id }, select: { tmdbId: true } });
+  },
 };

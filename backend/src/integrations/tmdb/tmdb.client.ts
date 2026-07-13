@@ -8,6 +8,7 @@ import type {
   TmdbImagenesPelicula,
   TmdbListadoPeliculas,
   TmdbVideosPelicula,
+  TmdbProveedoresPelicula,
 } from './tmdb.types';
 
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -25,6 +26,8 @@ export const tmdbImageUrl = {
   poster: (path: string) => `${IMAGE_BASE}/w500${path}`,
   backdrop: (path: string) => `${IMAGE_BASE}/w1280${path}`,
   perfil: (path: string) => `${IMAGE_BASE}/h632${path}`,
+  // Logos de plataformas: son chicos y cuadrados, w92 alcanza para 2x.
+  logo: (path: string) => `${IMAGE_BASE}/w92${path}`,
 };
 
 class TmdbClient {
@@ -130,6 +133,14 @@ class TmdbClient {
       language: IDIOMA,
       include_video_language: 'es,en',
     });
+  }
+
+  /**
+   * Dónde ver una película por país (datos de JustWatch). Sin `language`: la
+   * respuesta viene por código de país y el nombre del proveedor no se traduce.
+   */
+  getProveedores(tmdbId: number): Promise<TmdbProveedoresPelicula> {
+    return this.get(`/movie/${tmdbId}/watch/providers`);
   }
 }
 

@@ -133,6 +133,18 @@ export interface ColorSwatch {
   stillUrl: string | null;
 }
 
+export interface PlataformaStreaming {
+  id: number;
+  nombre: string;
+  logoUrl: string | null;
+}
+
+export interface DisponibilidadStreaming {
+  plataformas: PlataformaStreaming[];
+  /** Página de JustWatch/TMDB con el detalle de dónde verla (null si no hay). */
+  link: string | null;
+}
+
 export interface PersonaDetalle {
   id: string;
   tmdbId: number | null;
