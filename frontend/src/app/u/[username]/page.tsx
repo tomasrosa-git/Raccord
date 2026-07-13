@@ -56,6 +56,18 @@ function TarjetaPanteon({ entrada, orden }: { entrada: EntradaPanteon; orden: nu
         </Link>
       </div>
 
+      {entrada.progreso.total > 0 && (
+        <p className="mt-3 font-mono text-xs text-papel/40">
+          {entrada.progreso.vistas === entrada.progreso.total ? (
+            <span className="text-marca-cambio">★ Completista</span>
+          ) : (
+            <>
+              Vio {entrada.progreso.vistas} de {entrada.progreso.total} películas
+            </>
+          )}
+        </p>
+      )}
+
       {entrada.pelicula ? (
         <Link
           href={`/pelicula/${entrada.pelicula.id}`}

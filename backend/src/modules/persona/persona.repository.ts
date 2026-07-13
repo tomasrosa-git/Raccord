@@ -114,4 +114,21 @@ export const personaRepository = {
     });
     return rel !== null;
   },
+
+  /** Progreso del completista: cuántas de las películas dirigidas por esta
+   * persona ya vio el usuario. */
+  async progresoFilmografia(usuarioId: string, personaId: string) {
+    const dirigidas = await prisma.creditoPelicula.findMany({
+      where: { personaId, rol: 'DIRECTOR' },
+      select: { peliculaId: true },
+      distinct: ['peliculaId'],
+    });
+    const total = dirigidas.length;
+    if (total === 0) return { vistas: 0, total: 0 };
+
+    const vistas = await prisma.visto.count({
+      where: { usuarioId, peliculaId: { in: dirigidas.map((d) => d.peliculaId) } },
+    });
+    return { vistas, total };
+  },
 };

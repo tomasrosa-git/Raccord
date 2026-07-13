@@ -246,6 +246,8 @@ export interface EntradaPanteon {
     posterUrl: string | null;
     fechaEstreno: string | null;
   } | null;
+  // Completista: cuántas de sus películas ya vio el dueño del perfil.
+  progreso: { vistas: number; total: number };
 }
 
 export interface PerfilPublico {

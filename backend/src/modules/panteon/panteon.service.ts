@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma';
 import { AppError } from '../../shared/errors/AppError';
+import { personaRepository } from '../persona/persona.repository';
 
 // Tope del panteón: es una selección curada, no una lista larga.
 const MAX_PANTEON = 12;
@@ -110,7 +111,7 @@ export const panteonService = {
     });
     if (!usuario) throw AppError.notFound('Usuario no encontrado');
 
-    const [panteon, reviews, reviewsPersona, siguiendo, likes] = await Promise.all([
+    const [panteonSinProgreso, reviews, reviewsPersona, siguiendo, likes] = await Promise.all([
       prisma.directorFavorito.findMany({
         where: { usuarioId: usuario.id },
         include: incluirEntrada,
@@ -121,6 +122,14 @@ export const panteonService = {
       prisma.seguidorPersona.count({ where: { usuarioId: usuario.id } }),
       prisma.like.count({ where: { usuarioId: usuario.id } }),
     ]);
+
+    // Completista: cuántas de las películas de cada director ya vio el dueño del perfil.
+    const panteon = await Promise.all(
+      panteonSinProgreso.map(async (entrada) => ({
+        ...entrada,
+        progreso: await personaRepository.progresoFilmografia(usuario.id, entrada.personaId),
+      }))
+    );
 
     return {
       usuario,

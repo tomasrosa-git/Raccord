@@ -45,10 +45,11 @@ export const personaService = {
   },
 
   async miEstado(usuarioId: string, personaId: string) {
-    const [siguiendo, enPanteon] = await Promise.all([
+    const [siguiendo, enPanteon, progreso] = await Promise.all([
       personaRepository.estaSiguiendo(usuarioId, personaId),
       personaRepository.estaEnPanteon(usuarioId, personaId),
+      personaRepository.progresoFilmografia(usuarioId, personaId),
     ]);
-    return { siguiendo, enPanteon };
+    return { siguiendo, enPanteon, progreso };
   },
 };

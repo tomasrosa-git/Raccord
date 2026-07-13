@@ -58,7 +58,7 @@ export const likesService = {
 
 /** Estado del usuario sobre una película (para pintar los toggles). */
 export async function estadoSobrePelicula(usuarioId: string, peliculaId: string) {
-  const [enWatchlist, conLike] = await Promise.all([
+  const [enWatchlist, conLike, vista] = await Promise.all([
     prisma.watchlistItem.findUnique({
       where: { usuarioId_peliculaId: { usuarioId, peliculaId } },
       select: { usuarioId: true },
@@ -67,6 +67,10 @@ export async function estadoSobrePelicula(usuarioId: string, peliculaId: string)
       where: { usuarioId_peliculaId: { usuarioId, peliculaId } },
       select: { usuarioId: true },
     }),
+    prisma.visto.findUnique({
+      where: { usuarioId_peliculaId: { usuarioId, peliculaId } },
+      select: { usuarioId: true },
+    }),
   ]);
-  return { enWatchlist: !!enWatchlist, conLike: !!conLike };
+  return { enWatchlist: !!enWatchlist, conLike: !!conLike, vista: !!vista };
 }
